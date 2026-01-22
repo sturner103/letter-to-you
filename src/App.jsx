@@ -80,6 +80,15 @@ export default function App() {
     }
   ];
 
+  // Refs for speech recognition callbacks
+  const answersRef = useRef(answers);
+  const currentQuestionRef = useRef(null);
+  
+  // Keep refs updated
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
   // Check for speech recognition support
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -95,12 +104,10 @@ export default function App() {
           transcript += event.results[i][0].transcript;
         }
         // Append to current answer
-        if (currentQuestion) {
-          const currentAnswer = answers[currentQuestion.id] || '';
-          // Only update with final results to avoid duplicates
-          if (event.results[event.results.length - 1].isFinal) {
-            handleAnswerChange(currentQuestion.id, currentAnswer + transcript + ' ');
-          }
+        const question = currentQuestionRef.current;
+        if (question && event.results[event.results.length - 1].isFinal) {
+          const currentAnswer = answersRef.current[question.id] || '';
+          setAnswers(prev => ({ ...prev, [question.id]: currentAnswer + transcript + ' ' }));
         }
       };
       
@@ -113,7 +120,7 @@ export default function App() {
         setIsListening(false);
       };
     }
-  }, [currentQuestion, answers]);
+  }, []);
 
   // Toggle speech recognition
   const toggleListening = () => {
@@ -364,6 +371,11 @@ export default function App() {
 
   // Current question
   const currentQuestion = questions[currentIndex];
+  
+  // Keep currentQuestion ref updated for speech recognition
+  useEffect(() => {
+    currentQuestionRef.current = currentQuestion;
+  }, [currentQuestion]);
 
   // Skip/quick response options for regular interview
   const skipOptions = [
