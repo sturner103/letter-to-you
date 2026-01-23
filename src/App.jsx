@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { modes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
+import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
 // Views: landing, how-it-works, resources, your-letters, mode-select, interview, generating, letter, crisis
 export default function App() {
@@ -259,7 +259,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: selectedMode,
-          modeName: modes.find(m => m.id === selectedMode)?.name || 'General Reflection',
+          modeName: modes.find(m => m.id === selectedMode)?.name || 
+                    lifeEventModes.find(m => m.id === selectedMode)?.name || 
+                    'General Reflection',
           tone: tone,
           qaPairs
         })
@@ -838,6 +840,22 @@ export default function App() {
               ))}
             </div>
 
+            <p className="mode-divider">— or choose a life moment —</p>
+
+            <div className="mode-grid life-events">
+              {lifeEventModes.map(mode => (
+                <button
+                  key={mode.id}
+                  className="mode-card life-event"
+                  onClick={() => startInterview(mode.id)}
+                >
+                  <span className="mode-icon">{mode.icon}</span>
+                  <span className="mode-name">{mode.name}</span>
+                  <span className="mode-desc">{mode.description}</span>
+                </button>
+              ))}
+            </div>
+
             <button className="btn text back-btn" onClick={() => setView('landing')}>
               ← Back to home
             </button>
@@ -1101,6 +1119,7 @@ export default function App() {
               <div className="letter-decorative-line"></div>
               
               <h1>A letter to you</h1>
+              <p className="letter-from">From a friend who sees you</p>
               <div className="letter-body">
                 {letter.split('\n\n').map((paragraph, i) => (
                   <p key={i}>{paragraph}</p>

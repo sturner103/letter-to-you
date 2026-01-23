@@ -957,6 +957,29 @@ body {
   margin: var(--space-md) 0;
 }
 
+/* Life Event Templates */
+.mode-grid.life-events {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: var(--space-lg);
+}
+
+.mode-card.life-event {
+  padding: var(--space-sm) var(--space-md);
+  border-style: dashed;
+}
+
+.mode-card.life-event .mode-icon {
+  font-size: 1.3rem;
+}
+
+.mode-card.life-event .mode-name {
+  font-size: 0.9rem;
+}
+
+.mode-card.life-event .mode-desc {
+  font-size: 0.8rem;
+}
+
 /* Quick Interview */
 .quick-interview {
   align-items: center;
@@ -1485,20 +1508,52 @@ body {
 .letter-view {
   align-items: center;
   justify-content: flex-start;
-  padding: var(--space-lg) var(--space-md);
+  padding: 3rem 1.5rem 4rem;
+  background: 
+    radial-gradient(ellipse at top, rgba(107, 124, 110, 0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #f8f7f5 0%, #f4f2ef 100%);
+  min-height: calc(100vh - var(--navbar-height));
 }
 
 .letter-container {
-  max-width: var(--max-width);
+  max-width: 640px;
   width: 100%;
 }
 
 .letter {
-  background: white;
-  padding: var(--space-xl) var(--space-lg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+  background: 
+    linear-gradient(180deg, #fffffe 0%, #fdfcfa 100%);
+  padding: 4rem 3.5rem 3.5rem;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 
+    0 1px 1px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 12px 48px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle left border accent */
+.letter::before {
+  content: '';
+  position: absolute;
+  top: 2rem;
+  bottom: 2rem;
+  left: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent) 0%, rgba(107, 124, 110, 0.3) 100%);
+}
+
+/* Corner flourish */
+.letter::after {
+  content: '❧';
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 1.5rem;
+  color: rgba(107, 124, 110, 0.15);
 }
 
 /* Print-only header - hidden on screen */
@@ -1512,32 +1567,104 @@ body {
 
 .letter h1 {
   font-family: var(--font-serif);
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 400;
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 0.35rem;
   color: var(--text);
-  padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant: small-caps;
+}
+
+.letter-from {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--accent);
+  margin-bottom: 0;
+  padding-bottom: 2.5rem;
+  position: relative;
+}
+
+/* Elegant divider line */
+.letter-from::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
 }
 
 .letter-body {
-  font-size: 1.05rem;
-  line-height: 1.9;
+  font-size: 1.08rem;
+  line-height: 2;
+  margin-top: 2.5rem;
 }
 
 .letter-body p {
-  margin-bottom: var(--space-md);
-  color: var(--text);
+  margin-bottom: 1.6rem;
+  color: #3d3a36;
+  text-indent: 1.5rem;
+}
+
+.letter-body p:first-child {
+  text-indent: 0;
+}
+
+.letter-body p:first-child::first-letter {
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  float: left;
+  line-height: 0.75;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  color: var(--accent);
+  font-weight: 400;
 }
 
 .letter-body p:last-child {
   margin-bottom: 0;
 }
 
-/* Letter closing - hidden on screen, shown in print */
+/* Letter closing */
 .letter-closing {
-  display: none;
+  display: block;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.letter-closing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+}
+
+.closing-line {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  font-weight: 300;
+}
+
+.closing-text {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
 }
 
 /* Print footer - hidden on screen */
@@ -1548,22 +1675,43 @@ body {
 .letter-actions {
   display: flex;
   justify-content: center;
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 0.75rem;
+  margin-top: 2rem;
   flex-wrap: wrap;
+}
+
+.letter-actions .btn {
+  font-size: 0.9rem;
+  padding: 0.6rem 1.25rem;
+}
+
+.letter-actions .btn.secondary {
+  background: white;
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+
+.letter-actions .btn.secondary:hover {
+  background: var(--bg-subtle);
+  border-color: var(--accent-soft);
+  color: var(--text);
 }
 
 .letter-note {
   text-align: center;
-  font-size: 0.9rem;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
   font-style: italic;
   color: var(--text-muted);
-  margin-top: var(--space-md);
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 
 .start-over-btn {
   display: block;
-  margin: var(--space-md) auto 0;
+  margin: 1rem auto 0;
+  font-size: 0.9rem;
 }
 
 /* ===== CRISIS ===== */
@@ -1720,11 +1868,31 @@ body {
     font-size: 24pt;
     font-weight: 400;
     text-align: center;
-    margin-bottom: 0.4in;
+    margin-bottom: 0.1in;
     padding-bottom: 0;
     border-bottom: none;
     color: #2c2825;
     letter-spacing: 0.02em;
+  }
+  
+  .letter-from {
+    text-align: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 11pt;
+    font-style: italic;
+    color: #6b7c6e;
+    margin-bottom: 0.35in;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .letter-from::after {
+    content: '◇';
+    display: block;
+    margin-top: 0.2in;
+    font-size: 10pt;
+    color: #d4cfc7;
+    font-style: normal;
   }
   
   /* Body text */
@@ -1885,6 +2053,10 @@ body {
   .tools-grid,
   .content-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .mode-grid.life-events {
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .nav-brand {

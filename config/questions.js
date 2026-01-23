@@ -8,6 +8,289 @@ export const modes = [
   { id: 'transition', name: 'Transition / Crossroads', icon: '⊕', description: 'When you\'re between chapters' }
 ];
 
+// Life Event Templates - specific situations
+export const lifeEventModes = [
+  { id: 'breakup', name: 'After a Breakup', icon: '💔', description: 'Processing the end of a relationship' },
+  { id: 'newbeginning', name: 'New Beginning', icon: '🌱', description: 'Starting a new job, city, or chapter' },
+  { id: 'grief', name: 'Processing Grief', icon: '🕊', description: 'Honoring loss and finding your way forward' },
+  { id: 'newparent', name: 'New Parent', icon: '👶', description: 'Navigating the identity shift of parenthood' },
+  { id: 'careercrossroads', name: 'Career Crossroads', icon: '🔄', description: 'Figuring out your next professional move' },
+  { id: 'milestone', name: 'Milestone Birthday', icon: '🎂', description: 'Reflecting on a new decade of life' }
+];
+
+// Life Event specific questions
+export const lifeEventQuestions = {
+  breakup: [
+    {
+      id: 'breakup-1',
+      section: 'processing',
+      sectionName: 'Processing',
+      prompt: "How are you really doing right now—not the version you tell others?",
+      type: 'long_text'
+    },
+    {
+      id: 'breakup-2',
+      section: 'reflection',
+      sectionName: 'Looking Back',
+      prompt: "What did this relationship teach you about yourself?",
+      type: 'long_text'
+    },
+    {
+      id: 'breakup-3',
+      section: 'identity',
+      sectionName: 'Identity',
+      prompt: "What parts of yourself did you lose or put aside in this relationship?",
+      type: 'long_text'
+    },
+    {
+      id: 'breakup-4',
+      section: 'healing',
+      sectionName: 'Healing',
+      prompt: "What do you need to forgive—in them, or in yourself?",
+      type: 'long_text'
+    },
+    {
+      id: 'breakup-5',
+      section: 'forward',
+      sectionName: 'Moving Forward',
+      prompt: "What do you want your next relationship (with yourself or someone else) to look like?",
+      type: 'long_text'
+    },
+    {
+      id: 'breakup-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What would you tell yourself six months from now, looking back at this moment?",
+      type: 'long_text'
+    }
+  ],
+  
+  newbeginning: [
+    {
+      id: 'newbeginning-1',
+      section: 'present',
+      sectionName: 'Right Now',
+      prompt: "What's the mix of excitement and fear you're feeling about this change?",
+      type: 'long_text'
+    },
+    {
+      id: 'newbeginning-2',
+      section: 'leaving',
+      sectionName: 'What You\'re Leaving',
+      prompt: "What are you grateful to leave behind? What will you miss?",
+      type: 'long_text'
+    },
+    {
+      id: 'newbeginning-3',
+      section: 'hopes',
+      sectionName: 'Hopes',
+      prompt: "In your most optimistic vision, what does this new chapter look like?",
+      type: 'long_text'
+    },
+    {
+      id: 'newbeginning-4',
+      section: 'fears',
+      sectionName: 'Fears',
+      prompt: "What's the thing you're most afraid won't work out?",
+      type: 'long_text'
+    },
+    {
+      id: 'newbeginning-5',
+      section: 'identity',
+      sectionName: 'Identity',
+      prompt: "Who do you want to become in this new chapter?",
+      type: 'long_text'
+    },
+    {
+      id: 'newbeginning-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What permission do you need to give yourself right now?",
+      type: 'long_text'
+    }
+  ],
+  
+  grief: [
+    {
+      id: 'grief-1',
+      section: 'honoring',
+      sectionName: 'Honoring',
+      prompt: "Tell me about what or who you've lost. What do you want me to know about them?",
+      type: 'long_text'
+    },
+    {
+      id: 'grief-2',
+      section: 'feeling',
+      sectionName: 'Feeling',
+      prompt: "How is the grief showing up in your daily life right now?",
+      type: 'long_text'
+    },
+    {
+      id: 'grief-3',
+      section: 'unsaid',
+      sectionName: 'Unsaid',
+      prompt: "What do you wish you could say to them, or about them, that you haven't?",
+      type: 'long_text'
+    },
+    {
+      id: 'grief-4',
+      section: 'carrying',
+      sectionName: 'Carrying Forward',
+      prompt: "What part of them or what they meant to you do you want to carry forward?",
+      type: 'long_text'
+    },
+    {
+      id: 'grief-5',
+      section: 'support',
+      sectionName: 'Support',
+      prompt: "What kind of support do you need right now that you're not getting?",
+      type: 'long_text'
+    },
+    {
+      id: 'grief-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What would it mean to honor your grief while still moving forward?",
+      type: 'long_text'
+    }
+  ],
+  
+  newparent: [
+    {
+      id: 'newparent-1',
+      section: 'real',
+      sectionName: 'The Real Version',
+      prompt: "How is parenthood different from what you expected—honestly?",
+      type: 'long_text'
+    },
+    {
+      id: 'newparent-2',
+      section: 'identity',
+      sectionName: 'Identity',
+      prompt: "What parts of your old self do you miss? What new parts are emerging?",
+      type: 'long_text'
+    },
+    {
+      id: 'newparent-3',
+      section: 'overwhelm',
+      sectionName: 'The Hard Parts',
+      prompt: "What's the thing you're not supposed to say out loud about being a parent?",
+      type: 'long_text'
+    },
+    {
+      id: 'newparent-4',
+      section: 'joy',
+      sectionName: 'The Joy',
+      prompt: "What moment recently made you feel like you're doing okay at this?",
+      type: 'long_text'
+    },
+    {
+      id: 'newparent-5',
+      section: 'values',
+      sectionName: 'Values',
+      prompt: "What kind of parent do you want to be? What matters most to you?",
+      type: 'long_text'
+    },
+    {
+      id: 'newparent-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What do you need to hear right now that no one is telling you?",
+      type: 'long_text'
+    }
+  ],
+  
+  careercrossroads: [
+    {
+      id: 'career-1',
+      section: 'stuck',
+      sectionName: 'Where You Are',
+      prompt: "What's not working about your current work situation?",
+      type: 'long_text'
+    },
+    {
+      id: 'career-2',
+      section: 'want',
+      sectionName: 'What You Want',
+      prompt: "If money and judgment weren't factors, what would you actually want to do?",
+      type: 'long_text'
+    },
+    {
+      id: 'career-3',
+      section: 'fear',
+      sectionName: 'Fears',
+      prompt: "What's the fear that's keeping you from making a change?",
+      type: 'long_text'
+    },
+    {
+      id: 'career-4',
+      section: 'patterns',
+      sectionName: 'Patterns',
+      prompt: "Have you been here before? What patterns do you notice in your career decisions?",
+      type: 'long_text'
+    },
+    {
+      id: 'career-5',
+      section: 'values',
+      sectionName: 'Values',
+      prompt: "What does meaningful work actually look like for you?",
+      type: 'long_text'
+    },
+    {
+      id: 'career-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What's one small step you could take in the next week toward clarity?",
+      type: 'long_text'
+    }
+  ],
+  
+  milestone: [
+    {
+      id: 'milestone-1',
+      section: 'reflection',
+      sectionName: 'Looking Back',
+      prompt: "As you look at the decade behind you, what are you most proud of?",
+      type: 'long_text'
+    },
+    {
+      id: 'milestone-2',
+      section: 'lessons',
+      sectionName: 'Lessons',
+      prompt: "What's the most important thing you learned about yourself in your " + "last decade?",
+      type: 'long_text'
+    },
+    {
+      id: 'milestone-3',
+      section: 'regrets',
+      sectionName: 'Regrets',
+      prompt: "Is there anything you wish you'd done differently? What would you tell your younger self?",
+      type: 'long_text'
+    },
+    {
+      id: 'milestone-4',
+      section: 'present',
+      sectionName: 'Right Now',
+      prompt: "How do you feel about where you are in life right now—really?",
+      type: 'long_text'
+    },
+    {
+      id: 'milestone-5',
+      section: 'future',
+      sectionName: 'Looking Forward',
+      prompt: "What do you want the next decade to be about?",
+      type: 'long_text'
+    },
+    {
+      id: 'milestone-6',
+      section: 'closing',
+      sectionName: 'Closing',
+      prompt: "What intention or word do you want to carry into this new chapter?",
+      type: 'long_text'
+    }
+  ]
+};
+
 export const questions = [
   // === A) ORIENTATION (2) ===
   {
@@ -231,6 +514,12 @@ export const questions = [
 
 // Get questions for a specific mode (max 10)
 export function getQuestionsForMode(mode) {
+  // Check if it's a life event mode
+  if (lifeEventQuestions[mode]) {
+    return lifeEventQuestions[mode];
+  }
+  
+  // Otherwise use the general questions
   const filtered = questions.filter(q => {
     // Always include core questions
     if (q.core) return true;
