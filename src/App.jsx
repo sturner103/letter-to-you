@@ -523,30 +523,13 @@ export default function App() {
               A guided reflection that ends with a letter — written to you, about you, 
               based on your own words.
             </p>
-            <button className="btn primary large" onClick={scrollToModes}>
-              Begin your reflection
-            </button>
           </div>
 
-          {/* Quick Letter Section */}
-          <section className="landing-section" ref={modesRef}>
-            <div className="quick-letter-hero">
-              <button className="quick-letter-card-large" onClick={startQuickLetter}>
-                <span className="quick-letter-badge">⚡ 2 minutes</span>
-                <span className="quick-letter-name">Quick Letter</span>
-                <span className="quick-letter-desc">
-                  5 questions with pre-written options. Perfect when you're short on time or words.
-                </span>
-                <span className="quick-letter-cta">Start quick reflection →</span>
-              </button>
-            </div>
-          </section>
-
           {/* Main Reflection Types */}
-          <section className="landing-section">
-            <h2 className="section-title">Or go deeper</h2>
+          <section className="landing-section" ref={modesRef}>
+            <h2 className="section-title">Choose a reflection</h2>
             <p className="section-intro">
-              Each reflection type asks different questions and produces a different kind of letter. Takes 10-15 minutes.
+              Each type asks different questions and produces a different kind of letter. Takes 10-15 minutes.
             </p>
             <div className="letter-types-grid">
               {letterTypes.map(type => (
@@ -582,6 +565,20 @@ export default function App() {
                   <span className="life-event-desc">{mode.description}</span>
                 </button>
               ))}
+            </div>
+          </section>
+
+          {/* Quick Letter Option */}
+          <section className="landing-section">
+            <div className="quick-letter-hero">
+              <button className="quick-letter-card-large" onClick={startQuickLetter}>
+                <span className="quick-letter-badge">⚡ 2 minutes</span>
+                <span className="quick-letter-name">Short on time?</span>
+                <span className="quick-letter-desc">
+                  Try the Quick Letter — 5 questions with pre-written options.
+                </span>
+                <span className="quick-letter-cta">Start quick reflection →</span>
+              </button>
             </div>
           </section>
 
