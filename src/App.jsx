@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from './hooks/useAuth.jsx';
+import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
@@ -20,7 +21,7 @@ export default function App() {
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [tone, setTone] = useState('warm');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user, signOut, isAuthenticated } = useAuth();
+  const { user, signOut, isAuthenticated, loading: authLoading } = useAuth();
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -30,6 +31,11 @@ export default function App() {
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const modesRef = useRef(null);
+
+  // Saved letters state
+  const [savedLetters, setSavedLetters] = useState([]);
+  const [lettersLoading, setLettersLoading] = useState(false);
+  const [letterSaveStatus, setLetterSaveStatus] = useState(null); // 'saving', 'saved', 'error'
 
   // Quick Letter questions with pre-written options
   const quickQuestions = [
@@ -259,8 +265,22 @@ export default function App() {
   const generateLetter = async () => {
     setView('generating');
     setError(null);
+    setLetterSaveStatus(null);
 
     try {
+      const questionsData = questions.map((q, i) => {
+        const answer = answers[q.id]?.trim() || '[skipped]';
+        const followUpAnswer = followUpAnswers[q.id]?.trim();
+        return {
+          question: q.prompt,
+          answer: answer,
+          followUp: q.followUp && followUpOpen[q.id] && followUpAnswer ? {
+            question: q.followUp,
+            answer: followUpAnswer
+          } : null
+        };
+      });
+
       const qaPairs = questions.map((q, i) => {
         const answer = answers[q.id]?.trim() || '[skipped]';
         const followUpAnswer = followUpAnswers[q.id]?.trim();
@@ -272,14 +292,16 @@ export default function App() {
         return text;
       }).join('\n\n---\n\n');
 
+      const modeName = modes.find(m => m.id === selectedMode)?.name ||
+                       lifeEventModes.find(m => m.id === selectedMode)?.name ||
+                       'General Reflection';
+
       const response = await fetch('/.netlify/functions/generate-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: selectedMode,
-          modeName: modes.find(m => m.id === selectedMode)?.name ||
-                    lifeEventModes.find(m => m.id === selectedMode)?.name ||
-                    'General Reflection',
+          modeName: modeName,
           tone: tone,
           qaPairs
         })
@@ -299,6 +321,14 @@ export default function App() {
       setLetter(data.letter);
       setHasLetter(true);
       setView('letter');
+      
+      // Scroll to top when letter is displayed
+      window.scrollTo(0, 0);
+
+      // Auto-save letter for authenticated users
+      if (user) {
+        await saveLetter(data.letter, selectedMode, tone, questionsData);
+      }
     } catch (err) {
       console.error('Generation error:', err);
       setError(`Something went wrong: ${err.message}. Please try again.`);
@@ -309,9 +339,17 @@ export default function App() {
 
   // Generate quick letter
   const generateQuickLetter = async () => {
+    setView('generating');
     setError(null);
+    setLetterSaveStatus(null);
 
     try {
+      const questionsData = quickQuestions.map((q) => ({
+        question: q.prompt,
+        answer: quickAnswers[q.id] || '[skipped]',
+        followUp: null
+      }));
+
       const qaPairs = quickQuestions.map((q, i) => {
         const answer = quickAnswers[q.id] || '[skipped]';
         return `Q${i + 1}: ${q.prompt}\nA${i + 1}: ${answer}`;
@@ -343,6 +381,14 @@ export default function App() {
       setHasLetter(true);
       setIsQuickMode(false);
       setView('letter');
+      
+      // Scroll to top when letter is displayed
+      window.scrollTo(0, 0);
+
+      // Auto-save letter for authenticated users
+      if (user) {
+        await saveLetter(data.letter, 'quick', 'warm', questionsData);
+      }
     } catch (err) {
       console.error('Generation error:', err);
       setError(`Something went wrong: ${err.message}. Please try again.`);
@@ -387,7 +433,100 @@ export default function App() {
     setFollowUpOpen({});
     setFollowUpAnswers({});
     setError(null);
+    setLetterSaveStatus(null);
   };
+
+  // Save letter to database (for authenticated users)
+  const saveLetter = async (letterContent, mode, toneUsed, questionsData) => {
+    if (!user) return null;
+    
+    setLetterSaveStatus('saving');
+    
+    try {
+      const { data, error } = await supabase
+        .from('letters')
+        .insert({
+          user_id: user.id,
+          mode: mode,
+          tone: toneUsed,
+          questions: questionsData,
+          letter_content: letterContent,
+          word_count: letterContent.split(/\s+/).length,
+          delivery_status: 'immediate'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setLetterSaveStatus('saved');
+      return data;
+    } catch (err) {
+      console.error('Error saving letter:', err);
+      setLetterSaveStatus('error');
+      return null;
+    }
+  };
+
+  // Fetch user's saved letters
+  const fetchSavedLetters = async () => {
+    if (!user) return;
+    
+    setLettersLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('letters')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setSavedLetters(data || []);
+    } catch (err) {
+      console.error('Error fetching letters:', err);
+    } finally {
+      setLettersLoading(false);
+    }
+  };
+
+  // Delete a saved letter
+  const deleteLetter = async (letterId) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('letters')
+        .delete()
+        .eq('id', letterId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      setSavedLetters(prev => prev.filter(l => l.id !== letterId));
+    } catch (err) {
+      console.error('Error deleting letter:', err);
+    }
+  };
+
+  // Load a saved letter into view
+  const viewSavedLetter = (savedLetter) => {
+    setLetter(savedLetter.letter_content);
+    setSelectedMode(savedLetter.mode);
+    setTone(savedLetter.tone || 'warm');
+    setHasLetter(true);
+    setLetterSaveStatus('saved'); // Already saved
+    setView('letter');
+    window.scrollTo(0, 0);
+  };
+
+  // Fetch letters when user logs in or when viewing Your Letters
+  useEffect(() => {
+    if (user && view === 'your-letters') {
+      fetchSavedLetters();
+    }
+  }, [user, view]);
 
   // Current question
   const currentQuestion = questions[currentIndex];
@@ -1151,9 +1290,119 @@ export default function App() {
               Consider reading this again in a week. Things may land differently.
             </p>
 
+            {/* Save status indicator */}
+            {user && letterSaveStatus && (
+              <p className={`letter-save-status ${letterSaveStatus}`}>
+                {letterSaveStatus === 'saving' && '💾 Saving to your account...'}
+                {letterSaveStatus === 'saved' && '✓ Saved to your account'}
+                {letterSaveStatus === 'error' && '⚠ Could not save - try again later'}
+              </p>
+            )}
+
+            {/* Sign-in prompt for non-authenticated users */}
+            {!user && (
+              <div className="save-prompt">
+                <p>Want to save this letter and access it later?</p>
+                <button className="btn secondary" onClick={() => setShowAuthModal(true)}>
+                  Sign in to save
+                </button>
+              </div>
+            )}
+
             <button className="btn text start-over-btn" onClick={startOver}>
               Start a new reflection
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Your Letters */}
+      {view === 'your-letters' && (
+        <div className="view your-letters-view">
+          <div className="your-letters-container">
+            <h1>Your Letters</h1>
+            
+            {!user ? (
+              <div className="letters-signin-prompt">
+                <p>Sign in to save and access your letters.</p>
+                <button className="btn primary" onClick={() => setShowAuthModal(true)}>
+                  Sign in
+                </button>
+              </div>
+            ) : lettersLoading ? (
+              <div className="letters-loading">
+                <p>Loading your letters...</p>
+              </div>
+            ) : savedLetters.length === 0 ? (
+              <div className="letters-empty">
+                <p>You haven't created any letters yet.</p>
+                <p className="letters-empty-sub">
+                  When you complete a reflection, your letter will automatically be saved here.
+                </p>
+                <button className="btn primary" onClick={() => setView('landing')}>
+                  Start your first reflection
+                </button>
+              </div>
+            ) : (
+              <div className="letters-list">
+                <p className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''} saved</p>
+                
+                {savedLetters.map((savedLetter) => {
+                  const modeInfo = modes.find(m => m.id === savedLetter.mode) ||
+                                   lifeEventModes.find(m => m.id === savedLetter.mode) ||
+                                   { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '○' };
+                  const date = new Date(savedLetter.created_at);
+                  
+                  return (
+                    <div key={savedLetter.id} className="saved-letter-card">
+                      <div className="saved-letter-header">
+                        <span className="saved-letter-icon">{modeInfo.icon || '○'}</span>
+                        <div className="saved-letter-meta">
+                          <span className="saved-letter-type">{modeInfo.name}</span>
+                          <span className="saved-letter-date">
+                            {date.toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        {savedLetter.tone && (
+                          <span className="saved-letter-tone">
+                            {savedLetter.tone === 'warm' && '♡'}
+                            {savedLetter.tone === 'direct' && '◇'}
+                            {savedLetter.tone === 'motivating' && '↗'}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="saved-letter-preview">
+                        {savedLetter.letter_content.substring(0, 200)}...
+                      </p>
+                      
+                      <div className="saved-letter-actions">
+                        <button
+                          className="btn secondary"
+                          onClick={() => viewSavedLetter(savedLetter)}
+                        >
+                          Read letter
+                        </button>
+                        <button
+                          className="btn text delete-btn"
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this letter?')) {
+                              deleteLetter(savedLetter.id);
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

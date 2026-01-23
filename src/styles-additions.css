@@ -812,3 +812,173 @@
     flex: 1;
   }
 }
+
+/* ==========================================
+   YOUR LETTERS PAGE STYLES
+   ========================================== */
+
+.your-letters-view {
+  min-height: 100vh;
+  padding-top: var(--space-xl);
+}
+
+.your-letters-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+
+.your-letters-container h1 {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  margin-bottom: var(--space-lg);
+  text-align: center;
+}
+
+.letters-signin-prompt,
+.letters-empty,
+.letters-loading {
+  text-align: center;
+  padding: var(--space-xl) var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.letters-signin-prompt p,
+.letters-empty p,
+.letters-loading p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.letters-empty-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.letters-count {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+.letters-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.saved-letter-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: var(--space-lg);
+  transition: box-shadow 0.2s;
+}
+
+.saved-letter-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.saved-letter-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.saved-letter-icon {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+.saved-letter-meta {
+  flex: 1;
+}
+
+.saved-letter-type {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.saved-letter-date {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.saved-letter-tone {
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+
+.saved-letter-preview {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+.saved-letter-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.delete-btn {
+  color: var(--text-muted) !important;
+}
+
+.delete-btn:hover {
+  color: #ef4444 !important;
+}
+
+/* Letter save status */
+.letter-save-status {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: var(--space-sm);
+}
+
+.letter-save-status.saving {
+  color: var(--text-muted);
+}
+
+.letter-save-status.saved {
+  color: #22c55e;
+}
+
+.letter-save-status.error {
+  color: #ef4444;
+}
+
+/* Save prompt for non-authenticated users */
+.save-prompt {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: var(--space-md);
+  text-align: center;
+  margin-top: var(--space-md);
+}
+
+.save-prompt p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  font-size: 0.95rem;
+}
+
+/* Mobile adjustments for Your Letters */
+@media (max-width: 600px) {
+  .your-letters-container {
+    padding: var(--space-md);
+  }
+  
+  .your-letters-container h1 {
+    font-size: 2rem;
+  }
+  
+  .saved-letter-actions {
+    flex-direction: column;
+  }
+}
