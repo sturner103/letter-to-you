@@ -687,22 +687,27 @@ export default function App() {
               </div>
             </div>
 
-            <div className="info-box">
-              <h3>Privacy</h3>
-              <p>Your responses are used only to generate your letter. Nothing is stored on our servers. Once you close or refresh the page, your data is gone.</p>
+            <div className="info-cards">
+              <div className="info-card">
+                <div className="info-card-icon">🔒</div>
+                <h3>Privacy first</h3>
+                <p>Nothing stored. Nothing tracked. Your words stay yours — once you close the page, it's gone.</p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-card-icon">💭</div>
+                <h3>Real questions</h3>
+                <p>Not therapy. Not a quiz. Just thoughtful prompts designed to help you think out loud.</p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-card-icon">✉️</div>
+                <h3>A mirror, not advice</h3>
+                <p>Your letter reflects your words back — helping you see patterns and name what you're feeling.</p>
+              </div>
             </div>
 
-            <div className="info-box">
-              <h3>The questions</h3>
-              <p>The questions are designed to be specific enough to be useful, open enough to let you go where you need to go. They're not therapy questions — they're thinking-out-loud questions.</p>
-            </div>
-
-            <div className="info-box">
-              <h3>The letter</h3>
-              <p>The letter isn't advice. It's a mirror. It reflects back what you said in a way that might help you see patterns, name feelings, or notice what you're avoiding. Think of it as a thoughtful friend summarizing what they heard.</p>
-            </div>
-
-            <button className="btn primary" onClick={scrollToModes}>
+            <button className="btn primary" onClick={() => setView('landing')}>
               Begin your reflection
             </button>
           </div>
@@ -781,19 +786,6 @@ export default function App() {
                   {showAllBooks ? 'Show less' : `Show ${resources.books.length - 4} more`}
                 </button>
               )}
-            </section>
-
-            <section className="resource-section">
-              <h2>If you need more support</h2>
-              <div className="support-box">
-                <p>If you're struggling, please consider talking to a professional. Here are some places to start:</p>
-                <ul>
-                  <li><a href="https://www.psychologytoday.com/us/therapists" target="_blank" rel="noopener noreferrer">Find a therapist</a> (Psychology Today directory)</li>
-                  <li><a href="https://www.betterhelp.com" target="_blank" rel="noopener noreferrer">BetterHelp</a> (online therapy)</li>
-                  <li><a href="https://www.talkspace.com" target="_blank" rel="noopener noreferrer">Talkspace</a> (online therapy)</li>
-                  <li><a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">Find a Helpline</a> (crisis support worldwide)</li>
-                </ul>
-              </div>
             </section>
 
             <button className="btn text back-btn" onClick={() => setView('landing')}>
