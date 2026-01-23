@@ -1,4 +1,4 @@
-// src/hooks/useAuth.js
+// src/hooks/useAuth.jsx
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         await fetchProfile(session.user.id);
       }
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
           await fetchProfile(session.user.id);
         } else {
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         data: { display_name: displayName }
       }
     });
-    
+
     if (error) throw error;
     return data;
   };
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
       email,
       password
     });
-    
+
     if (error) throw error;
     return data;
   };
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
         emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     });
-    
+
     if (error) throw error;
     return data;
   };
@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`
     });
-    
+
     if (error) throw error;
     return data;
   };

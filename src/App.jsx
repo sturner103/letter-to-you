@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './hooks/useAuth.jsx';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
