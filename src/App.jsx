@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from './hooks/useAuth';
+import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
 // Views: landing, how-it-works, resources, your-letters, interview, quick-interview, generating, letter, crisis
@@ -17,6 +19,8 @@ export default function App() {
   const [showAllYoutube, setShowAllYoutube] = useState(false);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [tone, setTone] = useState('warm');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user, signOut, isAuthenticated } = useAuth();
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -84,7 +88,7 @@ export default function App() {
   // Refs for speech recognition callbacks
   const answersRef = useRef(answers);
   const currentQuestionRef = useRef(null);
-  
+
   // Keep refs updated
   useEffect(() => {
     answersRef.current = answers;
@@ -98,7 +102,7 @@ export default function App() {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
-      
+
       recognitionRef.current.onresult = (event) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -111,12 +115,12 @@ export default function App() {
           setAnswers(prev => ({ ...prev, [question.id]: currentAnswer + transcript + ' ' }));
         }
       };
-      
+
       recognitionRef.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
-      
+
       recognitionRef.current.onend = () => {
         setIsListening(false);
       };
@@ -126,7 +130,7 @@ export default function App() {
   // Toggle speech recognition
   const toggleListening = () => {
     if (!recognitionRef.current) return;
-    
+
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
@@ -260,7 +264,7 @@ export default function App() {
       const qaPairs = questions.map((q, i) => {
         const answer = answers[q.id]?.trim() || '[skipped]';
         const followUpAnswer = followUpAnswers[q.id]?.trim();
-        
+
         let text = `Q${i + 1}: ${q.prompt}\nA${i + 1}: ${answer}`;
         if (q.followUp && followUpOpen[q.id] && followUpAnswer) {
           text += `\n\nFollow-up: ${q.followUp}\nAnswer: ${followUpAnswer}`;
@@ -273,8 +277,8 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: selectedMode,
-          modeName: modes.find(m => m.id === selectedMode)?.name || 
-                    lifeEventModes.find(m => m.id === selectedMode)?.name || 
+          modeName: modes.find(m => m.id === selectedMode)?.name ||
+                    lifeEventModes.find(m => m.id === selectedMode)?.name ||
                     'General Reflection',
           tone: tone,
           qaPairs
@@ -287,11 +291,11 @@ export default function App() {
       }
 
       const data = await response.json();
-      
+
       if (!data.letter) {
         throw new Error('No letter content received');
       }
-      
+
       setLetter(data.letter);
       setHasLetter(true);
       setView('letter');
@@ -330,11 +334,11 @@ export default function App() {
       }
 
       const data = await response.json();
-      
+
       if (!data.letter) {
         throw new Error('No letter content received');
       }
-      
+
       setLetter(data.letter);
       setHasLetter(true);
       setIsQuickMode(false);
@@ -387,7 +391,7 @@ export default function App() {
 
   // Current question
   const currentQuestion = questions[currentIndex];
-  
+
   // Keep currentQuestion ref updated for speech recognition
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
@@ -405,7 +409,7 @@ export default function App() {
   const letterTypes = [
     {
       id: 'general',
-      icon: '◯',
+      icon: '○',
       name: 'General Reflection',
       tagline: 'A broad exploration of where you are right now',
       description: 'For when you need to step back and take stock. This letter helps you see patterns across your whole life — what\'s working, what\'s not, and what might need attention.',
@@ -486,24 +490,33 @@ export default function App() {
             Letter to You
           </button>
           <div className="nav-links">
-            <button 
+            <button
               className={`nav-link ${view === 'how-it-works' ? 'active' : ''}`}
               onClick={() => setView('how-it-works')}
             >
               How it works
             </button>
-            <button 
+            <button
               className={`nav-link ${view === 'resources' ? 'active' : ''}`}
               onClick={() => setView('resources')}
             >
               Resources
             </button>
-            <button 
+            <button
               className={`nav-link ${view === 'your-letters' ? 'active' : ''}`}
               onClick={() => setView('your-letters')}
             >
               Your letters
             </button>
+            {isAuthenticated ? (
+              <button className="nav-link" onClick={signOut}>
+                Sign out
+              </button>
+            ) : (
+              <button className="nav-link" onClick={() => setShowAuthModal(true)}>
+                Sign in
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -514,7 +527,7 @@ export default function App() {
           <div className="landing-hero">
             <h1 className="hero-title">Letter to You</h1>
             <p className="hero-subtitle">
-              A guided reflection that ends with a letter — written to you, about you, 
+              A guided reflection that ends with a letter — written to you, about you,
               based on your own words.
             </p>
           </div>
@@ -610,26 +623,26 @@ export default function App() {
               <p className="email-signup-desc">
                 Get notified about new reflection types, features, and occasional thoughts on self-understanding.
               </p>
-              
+
               {emailSubmitted ? (
                 <div className="email-success">
                   <span className="email-success-icon">✓</span>
                   <p>You're in. We'll be in touch.</p>
                 </div>
               ) : (
-                <form 
-                  action="https://app.us5.list-manage.com/subscribe/post?u=7e3a1f921fef3d8643e45311f&id=7877f5082d&f_id=005ecbe1f0" 
-                  method="post" 
+                <form
+                  action="https://app.us5.list-manage.com/subscribe/post?u=7e3a1f921fef3d8643e45311f&id=7877f5082d&f_id=005ecbe1f0"
+                  method="post"
                   target="_blank"
                   className="email-form"
                   onSubmit={() => setEmailSubmitted(true)}
                 >
                   <div className="email-input-group">
-                    <input 
-                      type="email" 
-                      name="EMAIL" 
-                      placeholder="Your email" 
-                      required 
+                    <input
+                      type="email"
+                      name="EMAIL"
+                      placeholder="Your email"
+                      required
                       className="email-input"
                     />
                     <button type="submit" className="btn primary email-btn">
@@ -648,7 +661,7 @@ export default function App() {
 
           <footer className="landing-footer">
             <p>
-              If you're in crisis, please reach out to a <a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">crisis helpline</a>. 
+              If you're in crisis, please reach out to a <a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">crisis helpline</a>.
               This tool is not equipped to help with emergencies.
             </p>
           </footer>
@@ -660,7 +673,7 @@ export default function App() {
         <div className="view static-page">
           <div className="static-content">
             <h1>How it works</h1>
-            
+
             <div className="steps">
               <div className="step">
                 <div className="step-number">1</div>
@@ -669,7 +682,7 @@ export default function App() {
                   <p>Select from four reflection types: general, relationships, career, or life transitions. Each asks different questions tailored to that area.</p>
                 </div>
               </div>
-              
+
               <div className="step">
                 <div className="step-number">2</div>
                 <div className="step-content">
@@ -677,7 +690,7 @@ export default function App() {
                   <p>You'll see 10 questions, one at a time. Write as much or as little as you want. Skip any that don't resonate. Some have optional "go deeper" follow-ups.</p>
                 </div>
               </div>
-              
+
               <div className="step">
                 <div className="step-number">3</div>
                 <div className="step-content">
@@ -804,12 +817,12 @@ export default function App() {
               <span className="coming-soon-icon">📬</span>
               <h2>Coming Soon</h2>
               <p>
-                We're building something special — a place to keep all your letters, 
+                We're building something special — a place to keep all your letters,
                 track your journey over time, and even schedule letters to your future self.
               </p>
               <div className="coming-soon-features">
                 <div className="feature-item">
-                  <span className="feature-icon">📁</span>
+                  <span className="feature-icon">📝</span>
                   <span>Save & organize all your letters</span>
                 </div>
                 <div className="feature-item">
@@ -843,8 +856,8 @@ export default function App() {
             <div className="quick-progress">
               <span>Question {quickIndex + 1} of {quickQuestions.length}</span>
               <div className="quick-progress-bar">
-                <div 
-                  className="quick-progress-fill" 
+                <div
+                  className="quick-progress-fill"
                   style={{ width: `${((quickIndex + 1) / quickQuestions.length) * 100}%` }}
                 ></div>
               </div>
@@ -870,16 +883,16 @@ export default function App() {
             </div>
 
             <div className="quick-nav">
-              <button 
+              <button
                 className="btn secondary"
                 onClick={() => setQuickIndex(prev => prev - 1)}
                 disabled={quickIndex === 0}
               >
                 ← Back
               </button>
-              
+
               {quickIndex === quickQuestions.length - 1 ? (
-                <button 
+                <button
                   className="btn primary"
                   onClick={() => {
                     // Generate quick letter
@@ -891,7 +904,7 @@ export default function App() {
                   Generate letter
                 </button>
               ) : (
-                <button 
+                <button
                   className="btn primary"
                   onClick={() => setQuickIndex(prev => prev + 1)}
                   disabled={!quickAnswers[quickQuestions[quickIndex].id]}
@@ -901,8 +914,8 @@ export default function App() {
               )}
             </div>
 
-            <button 
-              className="btn text back-btn" 
+            <button
+              className="btn text back-btn"
               onClick={() => {
                 setIsQuickMode(false);
                 setView('landing');
@@ -944,7 +957,7 @@ export default function App() {
             <main className="question-main">
               <div className="question-container">
                 <div className="section-label">{currentQuestion.sectionName}</div>
-                
+
                 <h2 className="question-prompt">{currentQuestion.prompt}</h2>
 
                 <div className="answer-input-wrapper">
@@ -957,7 +970,7 @@ export default function App() {
                     rows={6}
                   />
                   {speechSupported && (
-                    <button 
+                    <button
                       type="button"
                       className={`mic-btn ${isListening ? 'listening' : ''}`}
                       onClick={toggleListening}
@@ -991,7 +1004,7 @@ export default function App() {
                 {/* Follow-up toggle */}
                 {currentQuestion.followUp && (
                   <div className="followup-section">
-                    <button 
+                    <button
                       className={`followup-toggle ${followUpOpen[currentQuestion.id] ? 'open' : ''}`}
                       onClick={() => toggleFollowUp(currentQuestion.id)}
                     >
@@ -1036,14 +1049,14 @@ export default function App() {
                 {error && <p className="error-message">{error}</p>}
 
                 <div className="question-nav">
-                  <button 
-                    className="btn secondary" 
+                  <button
+                    className="btn secondary"
                     onClick={goPrev}
                     disabled={currentIndex === 0}
                   >
                     ← Previous
                   </button>
-                  
+
                   <button className="btn text" onClick={skipQuestion}>
                     Skip
                   </button>
@@ -1094,15 +1107,15 @@ export default function App() {
               {/* Print header - only shows in PDF */}
               <div className="print-header">
                 <div className="print-logo">Letter to You</div>
-                <div className="print-date">{new Date().toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                <div className="print-date">{new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}</div>
               </div>
-              
+
               <div className="letter-decorative-line"></div>
-              
+
               <h1>A letter to you</h1>
               <p className="letter-from">From a friend who sees you</p>
               <div className="letter-body">
@@ -1110,12 +1123,12 @@ export default function App() {
                   <p key={i}>{paragraph}</p>
                 ))}
               </div>
-              
+
               <div className="letter-closing">
                 <p className="closing-line">—</p>
                 <p className="closing-text">Written with care, based on your words.</p>
               </div>
-              
+
               {/* Print footer - only shows in PDF */}
               <div className="print-footer">
                 <p>lettertoyou.app · A tool for self-reflection</p>
@@ -1173,6 +1186,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 }
