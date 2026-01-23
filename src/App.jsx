@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
-// Views: landing, how-it-works, resources, your-letters, mode-select, interview, generating, letter, crisis
+// Views: landing, how-it-works, resources, your-letters, interview, quick-interview, generating, letter, crisis
 export default function App() {
   const [view, setView] = useState('landing');
   const [selectedMode, setSelectedMode] = useState('general');
@@ -25,6 +25,7 @@ export default function App() {
   const [quickIndex, setQuickIndex] = useState(0);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const modesRef = useRef(null);
 
   // Quick Letter questions with pre-written options
   const quickQuestions = [
@@ -188,6 +189,19 @@ export default function App() {
     setAnswers({});
     setFollowUpOpen({});
     setFollowUpAnswers({});
+  };
+
+  // Start quick letter
+  const startQuickLetter = () => {
+    setIsQuickMode(true);
+    setQuickIndex(0);
+    setQuickAnswers({});
+    setView('quick-interview');
+  };
+
+  // Scroll to modes section
+  const scrollToModes = () => {
+    modesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Handle answer change
@@ -491,8 +505,8 @@ export default function App() {
               Your letters
             </button>
             <button 
-              className={`nav-link highlight ${view === 'mode-select' || view === 'interview' ? 'active' : ''}`}
-              onClick={() => setView('mode-select')}
+              className="nav-link highlight"
+              onClick={scrollToModes}
             >
               Begin
             </button>
@@ -500,7 +514,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Landing */}
+      {/* Landing - Now includes mode selection */}
       {view === 'landing' && (
         <div className="view landing">
           <div className="landing-hero">
@@ -509,20 +523,34 @@ export default function App() {
               A guided reflection that ends with a letter — written to you, about you, 
               based on your own words.
             </p>
-            <button className="btn primary large" onClick={() => setView('mode-select')}>
+            <button className="btn primary large" onClick={scrollToModes}>
               Begin your reflection
             </button>
           </div>
 
-          {/* Letter Types Section */}
+          {/* Quick Letter Section */}
+          <section className="landing-section" ref={modesRef}>
+            <div className="quick-letter-hero">
+              <button className="quick-letter-card-large" onClick={startQuickLetter}>
+                <span className="quick-letter-badge">⚡ 2 minutes</span>
+                <span className="quick-letter-name">Quick Letter</span>
+                <span className="quick-letter-desc">
+                  5 questions with pre-written options. Perfect when you're short on time or words.
+                </span>
+                <span className="quick-letter-cta">Start quick reflection →</span>
+              </button>
+            </div>
+          </section>
+
+          {/* Main Reflection Types */}
           <section className="landing-section">
-            <h2 className="section-title">Four ways to reflect</h2>
+            <h2 className="section-title">Or go deeper</h2>
             <p className="section-intro">
-              Each letter type asks different questions and produces a different kind of letter.
+              Each reflection type asks different questions and produces a different kind of letter. Takes 10-15 minutes.
             </p>
             <div className="letter-types-grid">
               {letterTypes.map(type => (
-                <div key={type.id} className="letter-type-card">
+                <button key={type.id} className="letter-type-card clickable" onClick={() => startInterview(type.id)}>
                   <div className="letter-type-header">
                     <span className="letter-type-icon">{type.icon}</span>
                     <span className="letter-type-name">{type.name}</span>
@@ -530,16 +558,35 @@ export default function App() {
                   <p className="letter-type-tagline">{type.tagline}</p>
                   <p className="letter-type-description">{type.description}</p>
                   <p className="letter-type-best-for"><strong>Best for:</strong> {type.bestFor}</p>
-                  <button className="btn secondary small" onClick={() => startInterview(type.id)}>
-                    Start this reflection
-                  </button>
-                </div>
+                  <span className="letter-type-cta">Start this reflection →</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Life Event Modes */}
+          <section className="landing-section alt">
+            <h2 className="section-title">Or choose a life moment</h2>
+            <p className="section-intro">
+              Specific reflections for specific situations.
+            </p>
+            <div className="life-events-grid">
+              {lifeEventModes.map(mode => (
+                <button
+                  key={mode.id}
+                  className="life-event-card"
+                  onClick={() => startInterview(mode.id)}
+                >
+                  <span className="life-event-icon">{mode.icon}</span>
+                  <span className="life-event-name">{mode.name}</span>
+                  <span className="life-event-desc">{mode.description}</span>
+                </button>
               ))}
             </div>
           </section>
 
           {/* What It Is / Isn't Section */}
-          <section className="landing-section alt">
+          <section className="landing-section">
             <h2 className="section-title">What this is (and isn't)</h2>
             <div className="what-it-is-grid">
               <div className="what-box is">
@@ -562,17 +609,6 @@ export default function App() {
                   <li>Something for moments of crisis</li>
                 </ul>
               </div>
-            </div>
-          </section>
-
-          {/* CTA Section */}
-          <section className="landing-section">
-            <div className="cta-box">
-              <h2>Ready to start?</h2>
-              <p>Takes about 10-15 minutes. You can skip any question.</p>
-              <button className="btn primary" onClick={() => setView('mode-select')}>
-                Begin your reflection
-              </button>
             </div>
           </section>
 
@@ -675,7 +711,7 @@ export default function App() {
               <p>The letter isn't advice. It's a mirror. It reflects back what you said in a way that might help you see patterns, name feelings, or notice what you're avoiding. Think of it as a thoughtful friend summarizing what they heard.</p>
             </div>
 
-            <button className="btn primary" onClick={() => setView('mode-select')}>
+            <button className="btn primary" onClick={scrollToModes}>
               Begin your reflection
             </button>
           </div>
@@ -788,77 +824,10 @@ export default function App() {
               <p className="empty-note">
                 For now, use the download or PDF options to save your letters locally.
               </p>
-              <button className="btn primary" onClick={() => setView('mode-select')}>
+              <button className="btn primary" onClick={scrollToModes}>
                 Start a New Letter
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mode Selection */}
-      {view === 'mode-select' && (
-        <div className="view mode-select">
-          <div className="mode-content">
-            <h2>What would you like to reflect on?</h2>
-            <p className="mode-intro">
-              Choose a focus. Each asks different questions.
-            </p>
-
-            {/* Quick Letter Option */}
-            <div className="quick-letter-option">
-              <button
-                className="quick-letter-card"
-                onClick={() => {
-                  setIsQuickMode(true);
-                  setQuickIndex(0);
-                  setQuickAnswers({});
-                  setView('quick-interview');
-                }}
-              >
-                <span className="quick-letter-badge">⚡ 2 minutes</span>
-                <span className="quick-letter-name">Quick Letter</span>
-                <span className="quick-letter-desc">
-                  5 questions with pre-written options. Perfect when you're short on time or words.
-                </span>
-              </button>
-            </div>
-
-            <p className="mode-divider">— or go deeper —</p>
-
-            <div className="mode-grid">
-              {modes.map(mode => (
-                <button
-                  key={mode.id}
-                  className="mode-card"
-                  onClick={() => startInterview(mode.id)}
-                >
-                  <span className="mode-icon">{mode.icon}</span>
-                  <span className="mode-name">{mode.name}</span>
-                  <span className="mode-desc">{mode.description}</span>
-                </button>
-              ))}
-            </div>
-
-            <p className="mode-divider">— or choose a life moment —</p>
-
-            <div className="mode-grid life-events">
-              {lifeEventModes.map(mode => (
-                <button
-                  key={mode.id}
-                  className="mode-card life-event"
-                  onClick={() => startInterview(mode.id)}
-                >
-                  <span className="mode-icon">{mode.icon}</span>
-                  <span className="mode-name">{mode.name}</span>
-                  <span className="mode-desc">{mode.description}</span>
-                </button>
-              ))}
-            </div>
-
-            <button className="btn text back-btn" onClick={() => setView('landing')}>
-              ← Back to home
-            </button>
           </div>
         </div>
       )}
@@ -932,10 +901,10 @@ export default function App() {
               className="btn text back-btn" 
               onClick={() => {
                 setIsQuickMode(false);
-                setView('mode-select');
+                setView('landing');
               }}
             >
-              ← Back to options
+              ← Back to home
             </button>
           </div>
         </div>
@@ -968,7 +937,6 @@ export default function App() {
               </div>
             </aside>
 
-            {/* Main Question Area */}
             <main className="question-main">
               <div className="question-container">
                 <div className="section-label">{currentQuestion.sectionName}</div>

@@ -2063,3 +2063,172 @@ body {
     font-size: 1rem;
   }
 }
+
+/* ===== MERGED LANDING PAGE ADDITIONS ===== */
+/* Added for combined landing + mode-select page */
+
+/* Quick Letter Hero Card (larger version for landing) */
+.quick-letter-hero {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.quick-letter-card-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--white) 100%);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.quick-letter-card-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(107, 124, 110, 0.2);
+}
+
+.quick-letter-card-large .quick-letter-badge {
+  background: var(--accent);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-sm);
+}
+
+.quick-letter-card-large .quick-letter-name {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: var(--space-xs);
+}
+
+.quick-letter-card-large .quick-letter-desc {
+  font-size: 1rem;
+  color: var(--text-soft);
+  max-width: 400px;
+  line-height: 1.5;
+  margin-bottom: var(--space-sm);
+}
+
+.quick-letter-card-large .quick-letter-cta {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Clickable Letter Type Cards */
+.letter-type-card.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid var(--border);
+}
+
+.letter-type-card.clickable:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.letter-type-card .letter-type-cta {
+  display: block;
+  margin-top: var(--space-sm);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Life Events Grid (for landing page) */
+.life-events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  max-width: var(--max-width-wide);
+  margin: 0 auto;
+}
+
+.life-event-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-md) var(--space-sm);
+  background: var(--white);
+  border: 1px dashed var(--border-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.life-event-card:hover {
+  border-color: var(--accent);
+  border-style: solid;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.life-event-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-xs);
+  color: var(--accent);
+}
+
+.life-event-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.life-event-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Responsive adjustments for merged landing */
+@media (max-width: 768px) {
+  .quick-letter-card-large {
+    padding: var(--space-md);
+  }
+  
+  .quick-letter-card-large .quick-letter-name {
+    font-size: 1.3rem;
+  }
+  
+  .life-events-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xs);
+  }
+  
+  .life-event-card {
+    padding: var(--space-sm);
+  }
+  
+  .life-event-icon {
+    font-size: 1.3rem;
+  }
+  
+  .life-event-name {
+    font-size: 0.85rem;
+  }
+  
+  .life-event-desc {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .life-events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
