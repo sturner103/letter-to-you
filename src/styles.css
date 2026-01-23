@@ -2067,6 +2067,53 @@ body {
 /* ===== MERGED LANDING PAGE ADDITIONS ===== */
 /* Added for combined landing + mode-select page */
 
+/* Condensed spacing for landing */
+.landing .landing-hero {
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+}
+
+.landing .landing-section {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.landing .section-intro {
+  margin-bottom: var(--space-md);
+}
+
+/* Coming Soon Features */
+.coming-soon-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+  text-align: left;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-subtle);
+  border-radius: 8px;
+}
+
+.feature-icon {
+  font-size: 1.25rem;
+}
+
+.feature-item span:last-child {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+/* Letter actions at top */
+.letter-actions-top {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
 /* Quick Letter Hero Card (larger version for landing) */
 .quick-letter-hero {
   max-width: 600px;
@@ -2230,5 +2277,9 @@ body {
 @media (max-width: 480px) {
   .life-events-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .coming-soon-features {
+    grid-template-columns: 1fr;
   }
 }

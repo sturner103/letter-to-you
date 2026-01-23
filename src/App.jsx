@@ -504,12 +504,6 @@ export default function App() {
             >
               Your letters
             </button>
-            <button 
-              className="nav-link highlight"
-              onClick={scrollToModes}
-            >
-              Begin
-            </button>
           </div>
         </div>
       </nav>
@@ -814,14 +808,35 @@ export default function App() {
         <div className="view static-page">
           <div className="static-content">
             <h1>Your letters</h1>
-            <div className="empty-state">
+            <div className="coming-soon-box">
+              <span className="coming-soon-icon">📬</span>
+              <h2>Coming Soon</h2>
               <p>
-                Letters are not stored on our servers. To save a letter, use the download or PDF options after it's generated.
+                We're building something special — a place to keep all your letters, 
+                track your journey over time, and even schedule letters to your future self.
               </p>
-              <p className="empty-note">
+              <div className="coming-soon-features">
+                <div className="feature-item">
+                  <span className="feature-icon">📁</span>
+                  <span>Save & organize all your letters</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">📅</span>
+                  <span>Schedule letters to your future self</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">📊</span>
+                  <span>Track your reflections over time</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">🔄</span>
+                  <span>Weekly check-ins & progress insights</span>
+                </div>
+              </div>
+              <p className="coming-soon-note">
                 For now, use the download or PDF options to save your letters locally.
               </p>
-              <button className="btn primary" onClick={scrollToModes}>
+              <button className="btn primary" onClick={() => setView('landing')}>
                 Start a New Letter
               </button>
             </div>
@@ -1070,6 +1085,19 @@ export default function App() {
       {view === 'letter' && (
         <div className="view letter-view">
           <div className="letter-container">
+            {/* Top action buttons */}
+            <div className="letter-actions letter-actions-top">
+              <button className="btn secondary" onClick={copyLetter}>
+                Copy text
+              </button>
+              <button className="btn secondary" onClick={downloadLetter}>
+                Download .txt
+              </button>
+              <button className="btn primary" onClick={saveToPdf}>
+                Save as PDF
+              </button>
+            </div>
+
             <article className="letter">
               {/* Print header - only shows in PDF */}
               <div className="print-header">
