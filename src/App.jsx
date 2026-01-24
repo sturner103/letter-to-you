@@ -1411,13 +1411,99 @@ export default function App() {
               </div>
             ) : savedLetters.length === 0 ? (
               <div className="letters-empty">
-                <p>You haven't created any letters yet.</p>
-                <p className="letters-empty-sub">
-                  When you complete a reflection, your letter will automatically be saved here.
-                </p>
-                <button className="btn primary" onClick={() => setView('landing')}>
-                  Start your first reflection
-                </button>
+                <div className="empty-state-box">
+                  <div className="empty-icon">○</div>
+                  <h2 className="empty-title">Your story starts here</h2>
+                  <p className="empty-subtitle">
+                    Each letter you write becomes a snapshot of where you are. Over time, you'll see how far you've come.
+                  </p>
+                  <button className="btn primary" onClick={() => setView('landing')}>
+                    Write your first letter
+                  </button>
+                </div>
+
+                {/* Power User Preview */}
+                <div className="preview-section">
+                  <div className="preview-label">✨ Preview: Your future letter collection</div>
+                  
+                  <div className="preview-stats">
+                    <div className="preview-stat">
+                      <span className="preview-stat-number">12</span>
+                      <span className="preview-stat-label">Letters written</span>
+                    </div>
+                    <div className="preview-stat">
+                      <span className="preview-stat-number">4</span>
+                      <span className="preview-stat-label">Reflection types</span>
+                    </div>
+                    <div className="preview-stat">
+                      <span className="preview-stat-number">8</span>
+                      <span className="preview-stat-label">Months journaling</span>
+                    </div>
+                  </div>
+
+                  <div className="preview-compare-banner">
+                    <p>✓ 2 letters selected for comparison</p>
+                    <button className="preview-compare-btn">What's Changed?</button>
+                  </div>
+
+                  <div className="preview-letters">
+                    <div className="preview-letter-card selected">
+                      <div className="preview-letter-check">✓</div>
+                      <div className="preview-letter-content">
+                        <div className="preview-letter-header">
+                          <span className="preview-letter-icon">✦</span>
+                          <div className="preview-letter-meta">
+                            <span className="preview-letter-type">The Original</span>
+                            <span className="preview-letter-date">January 2026</span>
+                          </div>
+                        </div>
+                        <p className="preview-letter-snippet">"You've been carrying something heavy lately — not the kind that shows, but the kind that sits in your chest when the room goes quiet..."</p>
+                      </div>
+                    </div>
+
+                    <div className="preview-letter-card">
+                      <div className="preview-letter-check"></div>
+                      <div className="preview-letter-content">
+                        <div className="preview-letter-header">
+                          <span className="preview-letter-icon">∞</span>
+                          <div className="preview-letter-meta">
+                            <span className="preview-letter-type">Relationships & Connection</span>
+                            <span className="preview-letter-date">December 2025</span>
+                          </div>
+                        </div>
+                        <p className="preview-letter-snippet">"There's a pattern here worth naming: you give until you're empty, then wonder why no one notices you're gone..."</p>
+                      </div>
+                    </div>
+
+                    <div className="preview-letter-card">
+                      <div className="preview-letter-check"></div>
+                      <div className="preview-letter-content">
+                        <div className="preview-letter-header">
+                          <span className="preview-letter-icon">◈</span>
+                          <div className="preview-letter-meta">
+                            <span className="preview-letter-type">Career & Meaning</span>
+                            <span className="preview-letter-date">November 2025</span>
+                          </div>
+                        </div>
+                        <p className="preview-letter-snippet">"You're not lazy — you're misaligned. The exhaustion isn't from working too hard; it's from working on the wrong things..."</p>
+                      </div>
+                    </div>
+
+                    <div className="preview-letter-card selected">
+                      <div className="preview-letter-check">✓</div>
+                      <div className="preview-letter-content">
+                        <div className="preview-letter-header">
+                          <span className="preview-letter-icon">○</span>
+                          <div className="preview-letter-meta">
+                            <span className="preview-letter-type">General Reflection</span>
+                            <span className="preview-letter-date">September 2025</span>
+                          </div>
+                        </div>
+                        <p className="preview-letter-snippet">"Something in you is waking up — slowly, reluctantly, but unmistakably. You called it restlessness, but it might be something closer to hope..."</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <>

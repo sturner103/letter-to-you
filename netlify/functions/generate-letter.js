@@ -27,7 +27,8 @@ Do NOT:
 - Be preachy or prescriptive
 - Use therapy jargon
 - Make assumptions beyond what they shared
-- Be falsely positive — honor the complexity`;
+- Be falsely positive — honor the complexity
+- Use markdown formatting (no **bold**, no *italics*, no bullet points) — write in plain prose`;
 
 const TONE_INSTRUCTIONS = {
   youdecide: `
