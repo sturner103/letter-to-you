@@ -30,6 +30,15 @@ Do NOT:
 - Be falsely positive — honor the complexity`;
 
 const TONE_INSTRUCTIONS = {
+  youdecide: `
+TONE: You Decide
+Read their answers carefully and choose the tone that best fits what they need right now. You might choose:
+- Warm & Gentle: If they seem vulnerable, hurting, or in need of compassion and validation
+- Clear & Direct: If they seem stuck in ambiguity and need honest clarity to move forward
+- Motivating: If they seem ready for action but need a push or encouragement
+
+Don't announce which tone you chose — just write in that voice naturally. Let their words guide you to what they need to hear.`,
+
   warm: `
 TONE: Warm & Gentle
 Write with deep compassion and gentleness. Use soft, supportive language. Validate their feelings before offering observations. Be like a caring friend who sees them clearly and accepts them fully. Phrases like "It makes sense that..." and "It's okay to feel..." fit this tone.`,

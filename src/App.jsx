@@ -19,7 +19,7 @@ export default function App() {
   const [showAllPodcasts, setShowAllPodcasts] = useState(false);
   const [showAllYoutube, setShowAllYoutube] = useState(false);
   const [showAllBooks, setShowAllBooks] = useState(false);
-  const [tone, setTone] = useState('warm');
+  const [tone, setTone] = useState('youdecide');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { user, signOut: supabaseSignOut, isAuthenticated, loading: authLoading } = useAuth();
 
@@ -172,6 +172,12 @@ export default function App() {
 
   // Tone options for letter generation
   const toneOptions = [
+    {
+      id: 'youdecide',
+      name: 'You Decide',
+      description: 'Based on what I shared',
+      icon: '✧'
+    },
     {
       id: 'warm',
       name: 'Warm & Gentle',
@@ -608,6 +614,14 @@ export default function App() {
 
   // Letter type details for landing page
   const letterTypes = [
+    {
+      id: 'original',
+      icon: '✦',
+      name: 'The Original',
+      tagline: 'The deep questions that started it all',
+      description: 'Ten profound questions designed to surface what\'s been hiding beneath the surface. This is the reflection that launched Letter to You — raw, searching, and deeply personal.',
+      bestFor: 'When you\'re ready to go deep and meet yourself honestly'
+    },
     {
       id: 'general',
       icon: '○',

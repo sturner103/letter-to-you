@@ -5,7 +5,8 @@ export const modes = [
   { id: 'general', name: 'General Reflection', icon: '◯', description: 'A broad exploration of where you are right now' },
   { id: 'relationships', name: 'Relationship & Connection', icon: '∞', description: 'Patterns in how you connect with others' },
   { id: 'career', name: 'Career & Meaning', icon: '◈', description: 'Work, purpose, and what you\'re building' },
-  { id: 'transition', name: 'Transition / Crossroads', icon: '⊕', description: 'When you\'re between chapters' }
+  { id: 'transition', name: 'Transition / Crossroads', icon: '⊕', description: 'When you\'re between chapters' },
+  { id: 'original', name: 'The Original', icon: '✦', description: 'The deep questions that started it all' }
 ];
 
 // Life Event Templates - specific situations
@@ -286,6 +287,79 @@ export const lifeEventQuestions = {
       section: 'closing',
       sectionName: 'Closing',
       prompt: "What intention or word do you want to carry into this new chapter?",
+      type: 'long_text'
+    }
+  ],
+
+  original: [
+    {
+      id: 'original-1',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "When in your life have you felt most at peace — not just happy, but deeply, quietly content — and what were the smallest details of that moment that stick with you?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-2',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "If your unconscious mind could speak to you in plain language — like a voice in a quiet room — what do you think it's been trying to say to you lately that you haven't quite heard?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-3',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "When do you notice yourself performing — subtly or overtly — rather than simply being? What do you think you're trying to prove in those moments, and to whom?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-4',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "What's a pattern — in love, work, or friendship — that you keep repeating, even though you know it doesn't serve you? And what fear might be hiding underneath that repetition?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-5',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "When do you most feel like the child version of yourself — not in a nostalgic way, but in the raw, unprotected, instinctive way — and what emotion usually surfaces in that state?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-6',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "If someone truly saw all of you — the light, the dark, the contradictions, the things you hide — what do you secretly hope they'd say to you in response?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-7',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "When you imagine a future where you feel fully at home — in your own skin, in your relationships, in your choices — what are three things that don't exist in that version of your life anymore?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-8',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "What truth about yourself do you suspect is there, just beneath the surface, but you haven't quite been ready to say out loud yet?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-9',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "If your heart could write a letter to your mind, what would it say — in just one sentence?",
+      type: 'long_text'
+    },
+    {
+      id: 'original-10',
+      section: 'depth',
+      sectionName: 'Deep Reflection',
+      prompt: "What part of yourself are you most afraid someone else might truly understand — and why would that kind of understanding feel dangerous?",
       type: 'long_text'
     }
   ]
