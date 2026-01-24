@@ -1,5 +1,5 @@
 // src/hooks/useAuth.jsx
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
@@ -12,13 +12,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
 
-      if (session?.user) {
-        await fetchProfile(session.user.id);
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getInitialSession();
@@ -26,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event);
         setUser(session?.user ?? null);
 
         if (session?.user) {
@@ -93,11 +100,70 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // Sign out
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  };
+  // Force clear all Supabase auth storage
+  const forceSignOut = useCallback(() => {
+    console.log('Force clearing auth storage...');
+    
+    // Clear all possible Supabase storage keys
+    const keysToRemove = [];
+    
+    // Check localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+        keysToRemove.push({ storage: 'local', key });
+      }
+    }
+    
+    // Check sessionStorage
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+        keysToRemove.push({ storage: 'session', key });
+      }
+    }
+    
+    // Remove all found keys
+    keysToRemove.forEach(({ storage, key }) => {
+      console.log(`Removing ${storage}Storage key: ${key}`);
+      if (storage === 'local') {
+        localStorage.removeItem(key);
+      } else {
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Update state immediately
+    setUser(null);
+    setProfile(null);
+    
+    console.log('Auth storage cleared');
+  }, []);
+
+  // Sign out with timeout protection
+  const signOut = useCallback(async () => {
+    console.log('signOut called');
+    
+    // Create a promise that rejects after timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Sign out timed out')), 3000);
+    });
+    
+    // Try the Supabase signOut with timeout
+    try {
+      await Promise.race([
+        supabase.auth.signOut(),
+        timeoutPromise
+      ]);
+      console.log('Supabase signOut succeeded');
+    } catch (error) {
+      console.warn('Supabase signOut failed or timed out:', error.message);
+      // Continue anyway - we'll force clear storage
+    }
+    
+    // Always force clear storage regardless of API call result
+    forceSignOut();
+  }, [forceSignOut]);
 
   // Update profile
   const updateProfile = async (updates) => {
@@ -131,6 +197,7 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signInWithMagicLink,
     signOut,
+    forceSignOut,
     updateProfile,
     resetPassword,
     isAuthenticated: !!user
