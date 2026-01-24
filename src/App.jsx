@@ -28,16 +28,20 @@ export default function App() {
     console.log('Sign out clicked');
     try {
       await supabaseSignOut();
-      console.log('Sign out successful');
-      // Reset app state
+      console.log('Sign out completed');
+    } catch (err) {
+      console.error('Sign out error:', err);
+    } finally {
+      // Always reset app state, regardless of whether signOut succeeded
       setView('landing');
       setSavedLetters([]);
       setLetter('');
       setHasLetter(false);
-      // Force reload to clear any cached state
-      window.location.reload();
-    } catch (err) {
-      console.error('Sign out error:', err);
+      setLetterSaveStatus(null);
+      // Small delay then reload to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   };
   const [emailSubmitted, setEmailSubmitted] = useState(false);
