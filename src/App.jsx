@@ -25,13 +25,17 @@ export default function App() {
 
   // Handle sign out with proper state reset
   const handleSignOut = async () => {
+    console.log('Sign out clicked');
     try {
       await supabaseSignOut();
+      console.log('Sign out successful');
       // Reset app state
       setView('landing');
       setSavedLetters([]);
       setLetter('');
       setHasLetter(false);
+      // Force reload to clear any cached state
+      window.location.reload();
     } catch (err) {
       console.error('Sign out error:', err);
     }
