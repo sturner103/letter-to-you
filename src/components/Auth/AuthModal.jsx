@@ -28,10 +28,18 @@ export const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
         case 'signup':
           await signUp(email, password, displayName);
-          setMessage({
-            type: 'success',
-            text: 'Check your email for a confirmation link!'
-          });
+          // Auto sign-in after signup (since email confirmation is disabled)
+          try {
+            await signIn(email, password);
+            onClose();
+          } catch {
+            // If auto sign-in fails, show success message
+            setMessage({
+              type: 'success',
+              text: 'Account created! You can now sign in.'
+            });
+            setMode('login');
+          }
           break;
 
         case 'magic-link':

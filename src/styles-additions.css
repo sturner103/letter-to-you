@@ -982,3 +982,129 @@
     flex-direction: column;
   }
 }
+
+/* ==========================================
+   YOUR LETTERS - ENHANCED FEATURES
+   ========================================== */
+
+.letters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid #e8e4df;
+}
+
+.letters-header .letters-count {
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.letters-controls {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.letters-sort {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  color: #333;
+}
+
+.letters-sort:focus {
+  outline: none;
+  border-color: var(--primary-color, #5c4a3d);
+}
+
+/* Compare feature */
+.compare-banner {
+  background: #f0ebe5;
+  border-radius: 10px;
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.compare-banner p {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.compare-btn {
+  padding: 10px 20px !important;
+}
+
+.compare-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+  font-style: italic;
+}
+
+/* Updated letter card with checkbox */
+.saved-letter-card {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.saved-letter-card.selected {
+  background: #f5f2ed;
+  border: 2px solid var(--primary-color, #5c4a3d);
+}
+
+.saved-letter-select {
+  padding-top: 4px;
+}
+
+.saved-letter-select input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-color, #5c4a3d);
+}
+
+.saved-letter-select input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.saved-letter-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.letters-footer {
+  margin-top: var(--space-lg);
+  text-align: center;
+  padding-top: var(--space-lg);
+  border-top: 1px solid #e8e4df;
+}
+
+/* Mobile adjustments for compare feature */
+@media (max-width: 600px) {
+  .letters-header {
+    flex-direction: column;
+    gap: var(--space-sm);
+    align-items: flex-start;
+  }
+  
+  .compare-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .compare-banner p {
+    width: 100%;
+  }
+}

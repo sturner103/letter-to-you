@@ -21,7 +21,21 @@ export default function App() {
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [tone, setTone] = useState('warm');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { user, signOut, isAuthenticated, loading: authLoading } = useAuth();
+  const { user, signOut: supabaseSignOut, isAuthenticated, loading: authLoading } = useAuth();
+
+  // Handle sign out with proper state reset
+  const handleSignOut = async () => {
+    try {
+      await supabaseSignOut();
+      // Reset app state
+      setView('landing');
+      setSavedLetters([]);
+      setLetter('');
+      setHasLetter(false);
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -36,6 +50,8 @@ export default function App() {
   const [savedLetters, setSavedLetters] = useState([]);
   const [lettersLoading, setLettersLoading] = useState(false);
   const [letterSaveStatus, setLetterSaveStatus] = useState(null); // 'saving', 'saved', 'error'
+  const [letterSort, setLetterSort] = useState('newest'); // 'newest', 'oldest', 'mode'
+  const [selectedForCompare, setSelectedForCompare] = useState([]); // IDs of selected letters
 
   // Quick Letter questions with pre-written options
   const quickQuestions = [
@@ -523,10 +539,48 @@ export default function App() {
 
   // Fetch letters when user logs in or when viewing Your Letters
   useEffect(() => {
-    if (user && view === 'your-letters') {
-      fetchSavedLetters();
+    if (view === 'your-letters') {
+      if (user) {
+        fetchSavedLetters();
+      } else {
+        setLettersLoading(false);
+        setSavedLetters([]);
+      }
     }
   }, [user, view]);
+
+  // Reset compare selection when leaving the page
+  useEffect(() => {
+    if (view !== 'your-letters') {
+      setSelectedForCompare([]);
+    }
+  }, [view]);
+
+  // Toggle letter selection for comparison
+  const toggleLetterSelection = (letterId) => {
+    setSelectedForCompare(prev => {
+      if (prev.includes(letterId)) {
+        return prev.filter(id => id !== letterId);
+      } else if (prev.length < 2) {
+        return [...prev, letterId];
+      }
+      return prev; // Max 2 selected
+    });
+  };
+
+  // Get sorted letters
+  const getSortedLetters = () => {
+    const letters = [...savedLetters];
+    switch (letterSort) {
+      case 'oldest':
+        return letters.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      case 'mode':
+        return letters.sort((a, b) => (a.mode || '').localeCompare(b.mode || ''));
+      case 'newest':
+      default:
+        return letters.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+  };
 
   // Current question
   const currentQuestion = questions[currentIndex];
@@ -648,7 +702,7 @@ export default function App() {
               Your letters
             </button>
             {isAuthenticated ? (
-              <button className="nav-link" onClick={signOut}>
+              <button className="nav-link" onClick={handleSignOut}>
                 Sign out
               </button>
             ) : (
@@ -1344,64 +1398,126 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div className="letters-list">
-                <p className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''} saved</p>
-                
-                {savedLetters.map((savedLetter) => {
-                  const modeInfo = modes.find(m => m.id === savedLetter.mode) ||
-                                   lifeEventModes.find(m => m.id === savedLetter.mode) ||
-                                   { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '○' };
-                  const date = new Date(savedLetter.created_at);
-                  
-                  return (
-                    <div key={savedLetter.id} className="saved-letter-card">
-                      <div className="saved-letter-header">
-                        <span className="saved-letter-icon">{modeInfo.icon || '○'}</span>
-                        <div className="saved-letter-meta">
-                          <span className="saved-letter-type">{modeInfo.name}</span>
-                          <span className="saved-letter-date">
-                            {date.toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </span>
+              <>
+                {/* Header with count and sorting */}
+                <div className="letters-header">
+                  <p className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</p>
+                  <div className="letters-controls">
+                    <select 
+                      className="letters-sort"
+                      value={letterSort}
+                      onChange={(e) => setLetterSort(e.target.value)}
+                    >
+                      <option value="newest">Newest first</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="mode">By type</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Compare button - shows when 2 letters selected */}
+                {selectedForCompare.length === 2 && (
+                  <div className="compare-banner">
+                    <p>2 letters selected</p>
+                    <button 
+                      className="btn primary compare-btn"
+                      onClick={() => {
+                        // Future: implement comparison view
+                        alert('Compare feature coming soon! This will show what has changed between your selected letters.');
+                      }}
+                    >
+                      What Has Changed?
+                    </button>
+                    <button 
+                      className="btn text"
+                      onClick={() => setSelectedForCompare([])}
+                    >
+                      Clear selection
+                    </button>
+                  </div>
+                )}
+
+                {selectedForCompare.length === 1 && (
+                  <p className="compare-hint">Select one more letter to compare</p>
+                )}
+
+                <div className="letters-list">
+                  {getSortedLetters().map((savedLetter) => {
+                    const modeInfo = modes.find(m => m.id === savedLetter.mode) ||
+                                     lifeEventModes.find(m => m.id === savedLetter.mode) ||
+                                     { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '○' };
+                    const date = new Date(savedLetter.created_at);
+                    const isSelected = selectedForCompare.includes(savedLetter.id);
+                    
+                    return (
+                      <div 
+                        key={savedLetter.id} 
+                        className={`saved-letter-card ${isSelected ? 'selected' : ''}`}
+                      >
+                        <div className="saved-letter-select">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleLetterSelection(savedLetter.id)}
+                            disabled={!isSelected && selectedForCompare.length >= 2}
+                          />
                         </div>
-                        {savedLetter.tone && (
-                          <span className="saved-letter-tone">
-                            {savedLetter.tone === 'warm' && '♡'}
-                            {savedLetter.tone === 'direct' && '◇'}
-                            {savedLetter.tone === 'motivating' && '↗'}
-                          </span>
-                        )}
+                        <div className="saved-letter-content">
+                          <div className="saved-letter-header">
+                            <span className="saved-letter-icon">{modeInfo.icon || '○'}</span>
+                            <div className="saved-letter-meta">
+                              <span className="saved-letter-type">{modeInfo.name}</span>
+                              <span className="saved-letter-date">
+                                {date.toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                            {savedLetter.tone && (
+                              <span className="saved-letter-tone">
+                                {savedLetter.tone === 'warm' && '♡'}
+                                {savedLetter.tone === 'direct' && '◇'}
+                                {savedLetter.tone === 'motivating' && '↗'}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <p className="saved-letter-preview">
+                            {savedLetter.letter_content.substring(0, 200)}...
+                          </p>
+                          
+                          <div className="saved-letter-actions">
+                            <button
+                              className="btn secondary"
+                              onClick={() => viewSavedLetter(savedLetter)}
+                            >
+                              Read letter
+                            </button>
+                            <button
+                              className="btn text delete-btn"
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this letter?')) {
+                                  deleteLetter(savedLetter.id);
+                                }
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <p className="saved-letter-preview">
-                        {savedLetter.letter_content.substring(0, 200)}...
-                      </p>
-                      
-                      <div className="saved-letter-actions">
-                        <button
-                          className="btn secondary"
-                          onClick={() => viewSavedLetter(savedLetter)}
-                        >
-                          Read letter
-                        </button>
-                        <button
-                          className="btn text delete-btn"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this letter?')) {
-                              deleteLetter(savedLetter.id);
-                            }
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+
+                <div className="letters-footer">
+                  <button className="btn secondary" onClick={() => setView('landing')}>
+                    Create new letter
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
