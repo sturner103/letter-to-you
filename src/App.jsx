@@ -1411,98 +1411,245 @@ export default function App() {
               </div>
             ) : savedLetters.length === 0 ? (
               <div className="letters-empty">
-                <div className="empty-state-box">
-                  <div className="empty-icon">○</div>
-                  <h2 className="empty-title">Your story starts here</h2>
-                  <p className="empty-subtitle">
-                    Each letter you write becomes a snapshot of where you are. Over time, you'll see how far you've come.
-                  </p>
-                  <button className="btn primary" onClick={() => setView('landing')}>
-                    Write your first letter
-                  </button>
+                {/* Feature Summary Strip */}
+                <div className="feature-strip">
+                  <div className="feature-item">
+                    <span className="feature-icon">📁</span>
+                    <span className="feature-text">Save & organize all your letters</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">📅</span>
+                    <span className="feature-text">Schedule letters to your future self</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">📊</span>
+                    <span className="feature-text">Track your reflections over time</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">💡</span>
+                    <span className="feature-text">Weekly check-ins & progress insights</span>
+                  </div>
                 </div>
 
-                {/* Power User Preview */}
+                {/* Sarah's Preview Section */}
                 <div className="preview-section">
-                  <div className="preview-label">✨ Preview: Your future letter collection</div>
+                  <div className="preview-banner">
+                    <p>See what's possible — here's <span className="sarah-name">Sarah's</span> letter collection</p>
+                  </div>
                   
-                  <div className="preview-stats">
-                    <div className="preview-stat">
-                      <span className="preview-stat-number">12</span>
-                      <span className="preview-stat-label">Letters written</span>
+                  <div className="sarah-collection">
+                    {/* Stats & Actions Header */}
+                    <div className="sarah-header">
+                      <div className="sarah-stats">
+                        <div className="sarah-stat">
+                          <span className="sarah-stat-number">6</span>
+                          <span className="sarah-stat-label">Letters</span>
+                        </div>
+                        <div className="sarah-stat">
+                          <span className="sarah-stat-number">4</span>
+                          <span className="sarah-stat-label">Reflection types</span>
+                        </div>
+                        <div className="sarah-stat">
+                          <span className="sarah-stat-number">5</span>
+                          <span className="sarah-stat-label">Months</span>
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="sarah-actions">
+                        <button className="action-btn">
+                          <span className="action-icon">⟷</span>
+                          Compare Two Letters
+                        </button>
+                        <button className="action-btn">
+                          <span className="action-icon">✎</span>
+                          Update Your Answers
+                        </button>
+                        <button className="action-btn">
+                          <span className="action-icon">📤</span>
+                          Export All
+                        </button>
+                      </div>
                     </div>
-                    <div className="preview-stat">
-                      <span className="preview-stat-number">4</span>
-                      <span className="preview-stat-label">Reflection types</span>
-                    </div>
-                    <div className="preview-stat">
-                      <span className="preview-stat-number">8</span>
-                      <span className="preview-stat-label">Months journaling</span>
+                    
+                    {/* Sarah's Letters */}
+                    <div className="sarah-letters">
+                      <div className="sarah-letter-card selected">
+                        <div className="sarah-letter-check">✓</div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">✦</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">The Original</span>
+                              <span className="sarah-letter-date">January 2026</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"You've been carrying something heavy lately — not the kind that shows, but the kind that sits in your chest when the room goes quiet..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="sarah-letter-card">
+                        <div className="sarah-letter-check"></div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">∞</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">Relationships & Connection</span>
+                              <span className="sarah-letter-date">December 2025</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"There's a pattern here worth naming: you give until you're empty, then wonder why no one notices you're gone..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="sarah-letter-card">
+                        <div className="sarah-letter-check"></div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">◈</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">Career & Meaning</span>
+                              <span className="sarah-letter-date">November 2025</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"You're not lazy — you're misaligned. The exhaustion isn't from working too hard; it's from working on the wrong things..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="sarah-letter-card selected">
+                        <div className="sarah-letter-check">✓</div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">⚡</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">Quick Reflection</span>
+                              <span className="sarah-letter-date">October 2025</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"Sometimes the bravest thing you can do is admit you're not okay. You did that today, and that matters..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="sarah-letter-card">
+                        <div className="sarah-letter-check"></div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">○</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">General Reflection</span>
+                              <span className="sarah-letter-date">September 2025</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"Something in you is waking up — slowly, reluctantly, but unmistakably. You called it restlessness, but it might be closer to hope..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="sarah-letter-card">
+                        <div className="sarah-letter-check"></div>
+                        <div className="sarah-letter-content">
+                          <div className="sarah-letter-header">
+                            <span className="sarah-letter-icon">△</span>
+                            <div className="sarah-letter-meta">
+                              <span className="sarah-letter-type">Growth & Change</span>
+                              <span className="sarah-letter-date">August 2025</span>
+                            </div>
+                          </div>
+                          <p className="sarah-letter-snippet">"The person you were a year ago wouldn't recognize the questions you're asking now. That's not confusion — that's evolution..."</p>
+                          <div className="sarah-letter-actions">
+                            <button className="card-action-btn read-btn">
+                              <span className="btn-icon">📖</span>
+                              Read
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">📄</span>
+                              Save to PDF
+                            </button>
+                            <button className="card-action-btn">
+                              <span className="btn-icon">🖨</span>
+                              Print
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="preview-compare-banner">
-                    <p>✓ 2 letters selected for comparison</p>
-                    <button className="preview-compare-btn">What's Changed?</button>
-                  </div>
-
-                  <div className="preview-letters">
-                    <div className="preview-letter-card selected">
-                      <div className="preview-letter-check">✓</div>
-                      <div className="preview-letter-content">
-                        <div className="preview-letter-header">
-                          <span className="preview-letter-icon">✦</span>
-                          <div className="preview-letter-meta">
-                            <span className="preview-letter-type">The Original</span>
-                            <span className="preview-letter-date">January 2026</span>
-                          </div>
-                        </div>
-                        <p className="preview-letter-snippet">"You've been carrying something heavy lately — not the kind that shows, but the kind that sits in your chest when the room goes quiet..."</p>
-                      </div>
-                    </div>
-
-                    <div className="preview-letter-card">
-                      <div className="preview-letter-check"></div>
-                      <div className="preview-letter-content">
-                        <div className="preview-letter-header">
-                          <span className="preview-letter-icon">∞</span>
-                          <div className="preview-letter-meta">
-                            <span className="preview-letter-type">Relationships & Connection</span>
-                            <span className="preview-letter-date">December 2025</span>
-                          </div>
-                        </div>
-                        <p className="preview-letter-snippet">"There's a pattern here worth naming: you give until you're empty, then wonder why no one notices you're gone..."</p>
-                      </div>
-                    </div>
-
-                    <div className="preview-letter-card">
-                      <div className="preview-letter-check"></div>
-                      <div className="preview-letter-content">
-                        <div className="preview-letter-header">
-                          <span className="preview-letter-icon">◈</span>
-                          <div className="preview-letter-meta">
-                            <span className="preview-letter-type">Career & Meaning</span>
-                            <span className="preview-letter-date">November 2025</span>
-                          </div>
-                        </div>
-                        <p className="preview-letter-snippet">"You're not lazy — you're misaligned. The exhaustion isn't from working too hard; it's from working on the wrong things..."</p>
-                      </div>
-                    </div>
-
-                    <div className="preview-letter-card selected">
-                      <div className="preview-letter-check">✓</div>
-                      <div className="preview-letter-content">
-                        <div className="preview-letter-header">
-                          <span className="preview-letter-icon">○</span>
-                          <div className="preview-letter-meta">
-                            <span className="preview-letter-type">General Reflection</span>
-                            <span className="preview-letter-date">September 2025</span>
-                          </div>
-                        </div>
-                        <p className="preview-letter-snippet">"Something in you is waking up — slowly, reluctantly, but unmistakably. You called it restlessness, but it might be something closer to hope..."</p>
-                      </div>
-                    </div>
-                  </div>
+                {/* Final CTA */}
+                <div className="cta-section">
+                  <h2>Start building your collection</h2>
+                  <p>Each letter becomes a snapshot of where you are. Over time, you'll see how far you've come.</p>
+                  <button className="btn primary" onClick={() => setView('landing')}>Create Your First Letter</button>
                 </div>
               </div>
             ) : (

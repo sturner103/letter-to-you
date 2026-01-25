@@ -1110,220 +1110,343 @@
 }
 
 /* ==========================================
-   EMPTY STATE - POWER USER PREVIEW
+   EMPTY STATE - SARAH'S PREVIEW
    ========================================== */
 
 .letters-empty {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
 }
 
-.empty-state-box {
-  background: white;
-  border-radius: 16px;
-  padding: 60px 40px;
-  text-align: center;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 24px;
-  opacity: 0.6;
-}
-
-.empty-title {
-  font-size: 1.4rem;
-  font-weight: 400;
-  margin-bottom: 12px;
-  color: var(--text-primary);
-}
-
-.empty-subtitle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  max-width: 400px;
-  margin: 0 auto 32px;
-}
-
-/* Preview Section */
-.preview-section {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
-}
-
-.preview-label {
-  display: inline-block;
-  background: linear-gradient(90deg, var(--accent), #7a8a7c);
-  color: white;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  margin-bottom: 24px;
-}
-
-.preview-stats {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 24px;
-  padding: 20px;
-  background: var(--bg-secondary);
-  border-radius: 12px;
-}
-
-.preview-stat {
-  text-align: center;
-}
-
-.preview-stat-number {
-  display: block;
-  font-size: 1.8rem;
-  color: var(--accent);
-  font-weight: 400;
-}
-
-.preview-stat-label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-
-.preview-compare-banner {
-  background: var(--accent);
-  color: white;
-  padding: 16px 24px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+/* Feature Summary Strip */
+.feature-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-.preview-compare-banner p {
-  font-size: 0.95rem;
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px;
+}
+
+.feature-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.feature-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* Sarah's Preview Section */
+.preview-section {
+  position: relative;
+}
+
+.preview-banner {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(90deg, transparent, rgba(139, 126, 108, 0.1), transparent);
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
+
+.preview-banner p {
+  font-size: 1rem;
+  color: #6B6860;
   margin: 0;
 }
 
-.preview-compare-btn {
-  background: white;
-  color: var(--accent);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: default;
-  font-weight: 500;
+.preview-banner .sarah-name {
+  font-weight: 600;
+  color: #5D5A55;
 }
 
-.preview-letters {
+/* Sarah's Collection - Muted Overlay */
+.sarah-collection {
+  position: relative;
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sarah-collection::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(250, 249, 247, 0.3) 100%);
+  pointer-events: none;
+}
+
+/* Sarah's Stats & Actions Header */
+.sarah-header {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.sarah-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #E8E5E0;
+  margin-bottom: 20px;
+}
+
+.sarah-stat {
+  text-align: center;
+}
+
+.sarah-stat-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+
+.sarah-stat-label {
+  font-size: 0.8rem;
+  color: #8B7E6C;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Action Buttons Row */
+.sarah-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #F5F3F0;
+  border: 1px solid #E0DCD6;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: #5D5A55;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #EBE8E3;
+  border-color: #D4CFC6;
+}
+
+.action-btn .action-icon {
+  font-size: 1.1rem;
+}
+
+/* Sarah's Letters */
+.sarah-letters {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.preview-letter-card {
-  background: var(--bg-secondary);
-  border-radius: 12px;
-  padding: 16px 20px;
+.sarah-letter-card {
   display: flex;
+  align-items: flex-start;
   gap: 16px;
-  opacity: 0.85;
-  transition: opacity 0.2s;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
-.preview-letter-card.selected {
-  border: 2px solid var(--accent);
-  opacity: 1;
+.sarah-letter-card.selected {
+  background: #F8F6F3;
+  border: 1px solid #D4CFC6;
 }
 
-.preview-letter-check {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #ccc;
+.sarah-letter-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #D4CFC6;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  color: var(--accent);
+  font-size: 0.75rem;
+  color: #8B7E6C;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.preview-letter-card.selected .preview-letter-check {
-  border-color: var(--accent);
-  background: var(--accent);
+.sarah-letter-card.selected .sarah-letter-check {
+  background: #8B7E6C;
+  border-color: #8B7E6C;
   color: white;
 }
 
-.preview-letter-content {
+.sarah-letter-content {
   flex: 1;
-  min-width: 0;
 }
 
-.preview-letter-header {
+.sarah-letter-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
 }
 
-.preview-letter-icon {
+.sarah-letter-icon {
   font-size: 1.2rem;
+  color: #8B7E6C;
 }
 
-.preview-letter-meta {
+.sarah-letter-meta {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
-.preview-letter-type {
+.sarah-letter-type {
+  font-weight: 500;
   font-size: 0.95rem;
   color: var(--text-primary);
 }
 
-.preview-letter-date {
+.sarah-letter-date {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: #9A958E;
 }
 
-.preview-letter-snippet {
+.sarah-letter-snippet {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: #6B6860;
   line-height: 1.5;
   font-style: italic;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  margin-bottom: 12px;
 }
 
-/* Mobile adjustments for preview */
-@media (max-width: 600px) {
-  .preview-stats {
-    flex-direction: column;
+/* Card Actions */
+.sarah-letter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid #E0DCD6;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #6B6860;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card-action-btn:hover {
+  background: #F5F3F0;
+  border-color: #D4CFC6;
+}
+
+.card-action-btn .btn-icon {
+  font-size: 0.9rem;
+}
+
+.card-action-btn.read-btn {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: white;
+}
+
+.card-action-btn.read-btn:hover {
+  background: #1a1816;
+}
+
+/* CTA Section */
+.cta-section {
+  text-align: center;
+  padding: 40px 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.cta-section h2 {
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.cta-section p {
+  font-size: 1rem;
+  color: #6B6860;
+  margin-bottom: 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Mobile adjustments for Sarah's preview */
+@media (max-width: 768px) {
+  .feature-strip {
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
   
-  .preview-compare-banner {
+  .sarah-stats {
+    gap: 24px;
+  }
+  
+  .sarah-actions {
+    gap: 8px;
+  }
+  
+  .action-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .sarah-letter-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-strip {
+    grid-template-columns: 1fr;
+  }
+  
+  .sarah-stats {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .sarah-actions {
     flex-direction: column;
-    text-align: center;
   }
   
-  .empty-state-box {
-    padding: 40px 24px;
-  }
-  
-  .preview-section {
-    padding: 24px 16px;
+  .action-btn {
+    justify-content: center;
   }
 }
