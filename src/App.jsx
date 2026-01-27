@@ -554,6 +554,12 @@ export default function App() {
   // Fetch letters when user logs in or when viewing Your Letters
   useEffect(() => {
     if (view === 'your-letters') {
+      // Wait for auth to finish loading before making any decisions
+      if (authLoading) {
+        setLettersLoading(true);
+        return;
+      }
+      
       if (user) {
         fetchSavedLetters();
       } else {
@@ -561,7 +567,7 @@ export default function App() {
         setSavedLetters([]);
       }
     }
-  }, [user, view]);
+  }, [user, view, authLoading]);
 
   // Reset compare selection when leaving the page
   useEffect(() => {
@@ -1023,47 +1029,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Your Letters */}
-      {view === 'your-letters' && (
-        <div className="view static-page">
-          <div className="static-content">
-            <h1>Your letters</h1>
-            <div className="coming-soon-box">
-              <span className="coming-soon-icon">📬</span>
-              <h2>Coming Soon</h2>
-              <p>
-                We're building something special — a place to keep all your letters,
-                track your journey over time, and even schedule letters to your future self.
-              </p>
-              <div className="coming-soon-features">
-                <div className="feature-item">
-                  <span className="feature-icon">📝</span>
-                  <span>Save & organize all your letters</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">📅</span>
-                  <span>Schedule letters to your future self</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">📊</span>
-                  <span>Track your reflections over time</span>
-                </div>
-                <div className="feature-item">
-                  <span className="feature-icon">🔄</span>
-                  <span>Weekly check-ins & progress insights</span>
-                </div>
-              </div>
-              <p className="coming-soon-note">
-                For now, use the download or PDF options to save your letters locally.
-              </p>
-              <button className="btn primary" onClick={() => setView('landing')}>
-                Start a New Letter
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Quick Interview */}
       {view === 'quick-interview' && (
         <div className="view quick-interview">
@@ -1398,34 +1363,34 @@ export default function App() {
           <div className="your-letters-container">
             <h1>Your Letters</h1>
             
-            {!user ? (
+            {authLoading || lettersLoading ? (
+              <div className="letters-loading">
+                <p>Loading your letters...</p>
+              </div>
+            ) : !user ? (
               <div className="letters-signin-prompt">
                 <p>Sign in to save and access your letters.</p>
                 <button className="btn primary" onClick={() => setShowAuthModal(true)}>
                   Sign in
                 </button>
               </div>
-            ) : lettersLoading ? (
-              <div className="letters-loading">
-                <p>Loading your letters...</p>
-              </div>
             ) : savedLetters.length === 0 ? (
               <div className="letters-empty">
-                {/* Feature Summary Strip */}
-                <div className="feature-strip">
-                  <div className="feature-item">
+                {/* Feature Items */}
+                <div className="feature-items-grid">
+                  <div className="feature-item-card">
                     <span className="feature-icon">📁</span>
                     <span className="feature-text">Save & organize all your letters</span>
                   </div>
-                  <div className="feature-item">
+                  <div className="feature-item-card">
                     <span className="feature-icon">📅</span>
                     <span className="feature-text">Schedule letters to your future self</span>
                   </div>
-                  <div className="feature-item">
+                  <div className="feature-item-card">
                     <span className="feature-icon">📊</span>
                     <span className="feature-text">Track your reflections over time</span>
                   </div>
-                  <div className="feature-item">
+                  <div className="feature-item-card">
                     <span className="feature-icon">💡</span>
                     <span className="feature-text">Weekly check-ins & progress insights</span>
                   </div>

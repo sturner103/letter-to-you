@@ -1119,7 +1119,35 @@
   gap: var(--space-lg);
 }
 
-/* Feature Summary Strip */
+/* Feature Items Grid - individual cards without outer wrapper */
+.feature-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.feature-item-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  background: #fafaf9;
+  border-radius: 8px;
+}
+
+.feature-item-card .feature-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.feature-item-card .feature-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* Legacy feature-strip - keeping for backward compatibility */
 .feature-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1409,6 +1437,10 @@
 
 /* Mobile adjustments for Sarah's preview */
 @media (max-width: 768px) {
+  .feature-items-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .feature-strip {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
