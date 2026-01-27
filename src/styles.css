@@ -1835,6 +1835,7 @@ body {
   /* Hide UI elements */
   .navbar,
   .letter-actions,
+  .letter-toolbar,
   .letter-note,
   .start-over-btn,
   .save-prompt,

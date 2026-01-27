@@ -5,7 +5,7 @@ import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
-// Routes: /, /how-it-works, /resources, /your-letters, /write/:mode, /letter, /crisis
+// Routes: /, /how-it-works, /your-letters, /write/:mode, /letter, /crisis
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,7 +15,6 @@ export default function App() {
     const path = location.pathname;
     if (path === '/') return 'landing';
     if (path === '/how-it-works') return 'how-it-works';
-    if (path === '/resources') return 'resources';
     if (path === '/your-letters') return 'your-letters';
     if (path === '/write/quick') return 'quick-interview';
     if (path.startsWith('/write/')) return 'interview';
@@ -38,13 +37,15 @@ export default function App() {
   const [letter, setLetter] = useState('');
   const [error, setError] = useState(null);
   const [hasLetter, setHasLetter] = useState(false);
-  const [showAllPodcasts, setShowAllPodcasts] = useState(false);
-  const [showAllYoutube, setShowAllYoutube] = useState(false);
-  const [showAllBooks, setShowAllBooks] = useState(false);
   const [tone, setTone] = useState('youdecide');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showAnswersModal, setShowAnswersModal] = useState(false);
   const [showRewriteModal, setShowRewriteModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [rewriteTone, setRewriteTone] = useState(null);
   const [isRewriting, setIsRewriting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false); // Internal state for generation
@@ -509,6 +510,51 @@ export default function App() {
     window.print();
   };
 
+  // Email letter to self
+  const emailLetter = async () => {
+    if (!emailAddress) return;
+    
+    setEmailSending(true);
+    try {
+      const response = await fetch('/.netlify/functions/email-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailAddress,
+          letter: letter,
+          mode: selectedMode
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to send email');
+      
+      setEmailSent(true);
+      setTimeout(() => {
+        setShowEmailModal(false);
+        setEmailSent(false);
+        setEmailAddress('');
+      }, 2000);
+    } catch (err) {
+      console.error('Email failed:', err);
+      alert('Failed to send email. Please try again.');
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
+  // Share letter (copy link)
+  const shareLetter = async () => {
+    // For now, just copy current URL - later could generate unique shareable links
+    const shareUrl = window.location.origin + '/letter';
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
+
   // Get formatted answers for display
   const getFormattedAnswers = () => {
     return questions.map((q, i) => ({
@@ -847,46 +893,6 @@ export default function App() {
     }
   ];
 
-  // Resources data
-  const resources = {
-    tools: [
-      { name: 'Calm', url: 'https://calm.com', desc: 'Meditation & sleep' },
-      { name: 'Headspace', url: 'https://headspace.com', desc: 'Guided mindfulness' },
-      { name: 'Woebot', url: 'https://woebot.io', desc: 'CBT chatbot' },
-      { name: 'Daylio', url: 'https://daylio.net', desc: 'Mood tracking' },
-      { name: 'Finch', url: 'https://finchcare.com', desc: 'Self-care pet app' },
-      { name: 'Bearable', url: 'https://bearable.app', desc: 'Symptom & mood tracker' }
-    ],
-    podcasts: [
-      { name: 'The Happiness Lab', host: 'Dr. Laurie Santos', desc: 'Science of happiness' },
-      { name: 'On Being', host: 'Krista Tippett', desc: 'Deep conversations on meaning' },
-      { name: 'Unlocking Us', host: 'Brené Brown', desc: 'Vulnerability & courage' },
-      { name: 'Ten Percent Happier', host: 'Dan Harris', desc: 'Meditation for skeptics' },
-      { name: 'The Ezra Klein Show', host: 'Ezra Klein', desc: 'Thoughtful long-form' },
-      { name: 'Hidden Brain', host: 'Shankar Vedantam', desc: 'Psychology of behavior' },
-      { name: 'Where Should We Begin?', host: 'Esther Perel', desc: 'Real therapy sessions' },
-      { name: 'We Can Do Hard Things', host: 'Glennon Doyle', desc: 'Navigating hard stuff' }
-    ],
-    youtube: [
-      { name: 'The School of Life', url: 'https://youtube.com/@theschooloflife', desc: 'Emotional intelligence' },
-      { name: 'Therapy in a Nutshell', url: 'https://youtube.com/@TherapyinaNutshell', desc: 'Mental health education' },
-      { name: 'HealthyGamerGG', url: 'https://youtube.com/@HealthyGamerGG', desc: 'Mental health for modern life' },
-      { name: 'Psych2Go', url: 'https://youtube.com/@Psych2go', desc: 'Psychology explainers' },
-      { name: 'Einzelgänger', url: 'https://youtube.com/@Einzelganger', desc: 'Philosophy for life' },
-      { name: 'Academy of Ideas', url: 'https://youtube.com/@academyofideas', desc: 'Deep philosophical dives' }
-    ],
-    books: [
-      { title: 'The Body Keeps the Score', author: 'Bessel van der Kolk', topic: 'Trauma & healing' },
-      { title: 'Attached', author: 'Amir Levine', topic: 'Attachment styles' },
-      { title: 'The Gifts of Imperfection', author: 'Brené Brown', topic: 'Self-acceptance' },
-      { title: 'Man\'s Search for Meaning', author: 'Viktor Frankl', topic: 'Purpose through suffering' },
-      { title: 'When Things Fall Apart', author: 'Pema Chödrön', topic: 'Buddhist wisdom for hard times' },
-      { title: 'Atomic Habits', author: 'James Clear', topic: 'Small changes, big results' },
-      { title: 'Set Boundaries, Find Peace', author: 'Nedra Glover Tawwab', topic: 'Healthy boundaries' },
-      { title: 'Adult Children of Emotionally Immature Parents', author: 'Lindsay C. Gibson', topic: 'Family patterns' }
-    ]
-  };
-
   return (
     <div className="app">
       {/* Navbar */}
@@ -907,12 +913,6 @@ export default function App() {
               onClick={() => navigate('/how-it-works')}
             >
               How it works
-            </button>
-            <button
-              className={`nav-link ${location.pathname === '/resources' ? 'active' : ''}`}
-              onClick={() => navigate('/resources')}
-            >
-              Resources
             </button>
             <button
               className={`nav-link ${location.pathname === '/your-letters' ? 'active' : ''}`}
@@ -1134,87 +1134,6 @@ export default function App() {
 
             <button className="btn primary" onClick={scrollToModes}>
               Begin your reflection
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Resources */}
-      {view === 'resources' && (
-        <div className="view static-page">
-          <div className="static-content wide">
-            <h1>Resources</h1>
-            <p className="resources-intro">
-              This tool is a starting point, not a destination. Here are some resources that might help you go deeper.
-            </p>
-
-            <section className="resource-section">
-              <h2>Apps & Tools</h2>
-              <div className="tools-grid">
-                {resources.tools.map((tool, i) => (
-                  <a key={i} href={tool.url} target="_blank" rel="noopener noreferrer" className="tool-card">
-                    <span className="tool-name">{tool.name}</span>
-                    <span className="tool-desc">{tool.desc}</span>
-                  </a>
-                ))}
-              </div>
-            </section>
-
-            <section className="resource-section">
-              <h2>Podcasts</h2>
-              <div className="content-grid">
-                {(showAllPodcasts ? resources.podcasts : resources.podcasts.slice(0, 4)).map((pod, i) => (
-                  <div key={i} className="content-card">
-                    <span className="content-name">{pod.name}</span>
-                    <span className="content-meta">{pod.host}</span>
-                    <span className="content-desc">{pod.desc}</span>
-                  </div>
-                ))}
-              </div>
-              {resources.podcasts.length > 4 && (
-                <button className="btn text show-more" onClick={() => setShowAllPodcasts(!showAllPodcasts)}>
-                  {showAllPodcasts ? 'Show less' : `Show ${resources.podcasts.length - 4} more`}
-                </button>
-              )}
-            </section>
-
-            <section className="resource-section">
-              <h2>YouTube Channels</h2>
-              <div className="content-grid">
-                {(showAllYoutube ? resources.youtube : resources.youtube.slice(0, 4)).map((yt, i) => (
-                  <a key={i} href={yt.url} target="_blank" rel="noopener noreferrer" className="content-card link">
-                    <span className="content-name">{yt.name}</span>
-                    <span className="content-desc">{yt.desc}</span>
-                  </a>
-                ))}
-              </div>
-              {resources.youtube.length > 4 && (
-                <button className="btn text show-more" onClick={() => setShowAllYoutube(!showAllYoutube)}>
-                  {showAllYoutube ? 'Show less' : `Show ${resources.youtube.length - 4} more`}
-                </button>
-              )}
-            </section>
-
-            <section className="resource-section">
-              <h2>Books</h2>
-              <div className="content-grid">
-                {(showAllBooks ? resources.books : resources.books.slice(0, 4)).map((book, i) => (
-                  <div key={i} className="content-card">
-                    <span className="content-name">{book.title}</span>
-                    <span className="content-meta">{book.author}</span>
-                    <span className="content-desc">{book.topic}</span>
-                  </div>
-                ))}
-              </div>
-              {resources.books.length > 4 && (
-                <button className="btn text show-more" onClick={() => setShowAllBooks(!showAllBooks)}>
-                  {showAllBooks ? 'Show less' : `Show ${resources.books.length - 4} more`}
-                </button>
-              )}
-            </section>
-
-            <button className="btn text back-btn" onClick={() => navigate('/')}>
-              ← Back to home
             </button>
           </div>
         </div>
@@ -1457,17 +1376,47 @@ export default function App() {
       {view === 'letter' && (
         <div className="view letter-view">
           <div className="letter-container">
-            {/* Top action buttons */}
-            <div className="letter-actions letter-actions-top">
-              <button className="btn secondary" onClick={printLetter}>
-                🖨 Print
-              </button>
-              <button className="btn secondary" onClick={() => setShowAnswersModal(true)}>
-                📝 My Answers
-              </button>
-              <button className="btn secondary" onClick={() => setShowRewriteModal(true)}>
-                ✎ Rewrite
-              </button>
+            {/* Consolidated Action Bar */}
+            <div className="letter-toolbar">
+              <div className="toolbar-group toolbar-left">
+                <span className="toolbar-label">Reflect</span>
+                <button className="toolbar-btn" onClick={() => setShowAnswersModal(true)}>
+                  <span className="toolbar-icon">📝</span>
+                  <span className="toolbar-text">My Answers</span>
+                </button>
+                <button className="toolbar-btn" onClick={() => setShowRewriteModal(true)}>
+                  <span className="toolbar-icon">✏️</span>
+                  <span className="toolbar-text">Rewrite</span>
+                </button>
+                <button className="toolbar-btn" onClick={scrollToModes}>
+                  <span className="toolbar-icon">✦</span>
+                  <span className="toolbar-text">Write Another</span>
+                </button>
+              </div>
+              
+              <div className="toolbar-group toolbar-right">
+                <span className="toolbar-label">Save & Share</span>
+                <button className="toolbar-btn" onClick={() => setShowEmailModal(true)}>
+                  <span className="toolbar-icon">✉️</span>
+                  <span className="toolbar-text">Email</span>
+                </button>
+                <button className="toolbar-btn" onClick={shareLetter}>
+                  <span className="toolbar-icon">{shareCopied ? '✓' : '🔗'}</span>
+                  <span className="toolbar-text">{shareCopied ? 'Copied!' : 'Share'}</span>
+                </button>
+                <button className="toolbar-btn" onClick={copyLetter}>
+                  <span className="toolbar-icon">📋</span>
+                  <span className="toolbar-text">Copy</span>
+                </button>
+                <button className="toolbar-btn" onClick={printLetter}>
+                  <span className="toolbar-icon">🖨️</span>
+                  <span className="toolbar-text">Print</span>
+                </button>
+                <button className="toolbar-btn toolbar-btn-primary" onClick={saveToPdf}>
+                  <span className="toolbar-icon">⬇️</span>
+                  <span className="toolbar-text">PDF</span>
+                </button>
+              </div>
             </div>
 
             <article className="letter">
@@ -1501,22 +1450,6 @@ export default function App() {
               </div>
             </article>
 
-            <div className="letter-actions">
-              <button className="btn secondary" onClick={copyLetter}>
-                Copy text
-              </button>
-              <button className="btn secondary" onClick={downloadLetter}>
-                Download .txt
-              </button>
-              <button className="btn primary" onClick={saveToPdf}>
-                Save as PDF
-              </button>
-            </div>
-
-            <p className="letter-note">
-              Consider reading this again in a week. Things may land differently.
-            </p>
-
             {/* Save status indicator */}
             {user && letterSaveStatus && (
               <p className={`letter-save-status ${letterSaveStatus}`}>
@@ -1535,10 +1468,6 @@ export default function App() {
                 </button>
               </div>
             )}
-
-            <button className="btn text start-over-btn" onClick={startOver}>
-              Start a new reflection
-            </button>
           </div>
         </div>
       )}
@@ -1948,6 +1877,47 @@ export default function App() {
             <button className="btn text" onClick={startOver}>
               Return to start
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="modal-overlay">
+          <div className="modal-content email-modal">
+            <button className="modal-close" onClick={() => { setShowEmailModal(false); setEmailSent(false); }}>×</button>
+            <h2>Email Your Letter</h2>
+            {emailSent ? (
+              <div className="email-success">
+                <span className="email-success-icon">✓</span>
+                <p>Letter sent! Check your inbox.</p>
+              </div>
+            ) : (
+              <>
+                <p className="email-intro">We'll send this letter to your inbox so you can read it again whenever you need to.</p>
+                <div className="email-form">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    className="email-input"
+                  />
+                  <button 
+                    className="btn primary" 
+                    onClick={emailLetter}
+                    disabled={!emailAddress || emailSending}
+                  >
+                    {emailSending ? 'Sending...' : 'Send Letter'}
+                  </button>
+                </div>
+              </>
+            )}
+            <div className="modal-actions">
+              <button className="btn text" onClick={() => { setShowEmailModal(false); setEmailSent(false); }}>
+                {emailSent ? 'Close' : 'Cancel'}
+              </button>
+            </div>
           </div>
         </div>
       )}

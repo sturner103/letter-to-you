@@ -1791,3 +1791,168 @@
     max-width: 100%;
   }
 }
+
+/* ==========================================
+   LETTER TOOLBAR
+   ========================================== */
+
+.letter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.toolbar-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.toolbar-btn-primary:hover {
+  background: var(--accent-dark, #5a6b5d);
+  border-color: var(--accent-dark, #5a6b5d);
+}
+
+.toolbar-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.toolbar-text {
+  font-weight: 500;
+}
+
+/* Responsive toolbar */
+@media (max-width: 900px) {
+  .letter-toolbar {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .toolbar-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .toolbar-label {
+    width: 100%;
+    margin-bottom: 4px;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .letter-toolbar {
+    padding: 12px;
+  }
+  
+  .toolbar-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .toolbar-text {
+    display: none;
+  }
+  
+  .toolbar-icon {
+    font-size: 1.1rem;
+  }
+  
+  .toolbar-btn-primary .toolbar-text {
+    display: inline;
+  }
+}
+
+/* ==========================================
+   EMAIL MODAL
+   ========================================== */
+
+.email-modal {
+  max-width: 420px;
+}
+
+.email-intro {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.email-form {
+  display: flex;
+  gap: 12px;
+}
+
+.email-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.email-success {
+  text-align: center;
+  padding: 24px;
+}
+
+.email-success-icon {
+  display: block;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.email-success p {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
