@@ -2,7 +2,7 @@
 // Based on the reflective interview spec
 
 export const modes = [
-  { id: 'general', name: 'General Reflection', icon: '◯', description: 'A broad exploration of where you are right now' },
+  { id: 'general', name: 'General Reflection', icon: '◎', description: 'A broad exploration of where you are right now' },
   { id: 'relationships', name: 'Relationship & Connection', icon: '∞', description: 'Patterns in how you connect with others' },
   { id: 'career', name: 'Career & Meaning', icon: '◈', description: 'Work, purpose, and what you\'re building' },
   { id: 'transition', name: 'Transition / Crossroads', icon: '⊕', description: 'When you\'re between chapters' },

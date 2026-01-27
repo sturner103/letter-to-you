@@ -149,6 +149,15 @@ body {
   color: white;
 }
 
+.nav-link.write-letter-link {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.nav-link.write-letter-link:hover {
+  background: var(--accent-light);
+}
+
 /* ===== BUTTONS ===== */
 .btn {
   font-family: var(--font-sans);
@@ -290,6 +299,13 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-md);
+}
+
+/* Center the last card when it's alone in its row (odd number of items) */
+.letter-type-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  max-width: calc(50% - var(--space-md) / 2);
+  justify-self: center;
 }
 
 .letter-type-card {
@@ -1465,6 +1481,19 @@ body {
   justify-content: center;
 }
 
+.generating-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 247, 245, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
 .generating-content {
   text-align: center;
 }
@@ -1659,6 +1688,21 @@ body {
   font-weight: 300;
 }
 
+.closing-signoff {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-soft);
+  margin-bottom: 0.25rem;
+}
+
+.closing-me {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--text-primary);
+}
+
 .closing-text {
   font-family: var(--font-serif);
   font-size: 0.9rem;
@@ -1792,7 +1836,11 @@ body {
   .navbar,
   .letter-actions,
   .letter-note,
-  .start-over-btn {
+  .start-over-btn,
+  .save-prompt,
+  .letter-save-status,
+  .modal-overlay,
+  .comparison-overlay {
     display: none !important;
   }
   
@@ -1938,6 +1986,21 @@ body {
     margin-bottom: 0.1in;
   }
   
+  .closing-signoff {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 12pt;
+    font-style: italic;
+    color: #2c2825;
+    margin-bottom: 0.05in;
+  }
+  
+  .closing-me {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 14pt;
+    font-style: italic;
+    color: #2c2825;
+  }
+  
   .closing-text {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 10pt;
@@ -1984,6 +2047,12 @@ body {
   .letter-types-grid,
   .what-it-is-grid {
     grid-template-columns: 1fr;
+  }
+  
+  /* Reset centering on mobile - full width single column */
+  .letter-type-card:last-child:nth-child(odd) {
+    max-width: 100%;
+    grid-column: auto;
   }
   
   .tools-grid,

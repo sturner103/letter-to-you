@@ -1,13 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth.jsx';
 import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
-// Views: landing, how-it-works, resources, your-letters, interview, quick-interview, generating, letter, crisis
+// Routes: /, /how-it-works, /resources, /your-letters, /write/:mode, /letter, /crisis
 export default function App() {
-  const [view, setView] = useState('landing');
-  const [selectedMode, setSelectedMode] = useState('general');
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Derive current "view" from URL path
+  const getViewFromPath = () => {
+    const path = location.pathname;
+    if (path === '/') return 'landing';
+    if (path === '/how-it-works') return 'how-it-works';
+    if (path === '/resources') return 'resources';
+    if (path === '/your-letters') return 'your-letters';
+    if (path === '/write/quick') return 'quick-interview';
+    if (path.startsWith('/write/')) return 'interview';
+    if (path === '/letter') return 'letter';
+    if (path === '/crisis') return 'crisis';
+    return 'landing'; // Default fallback
+  };
+  
+  const view = getViewFromPath();
+  const urlMode = location.pathname.startsWith('/write/') 
+    ? location.pathname.replace('/write/', '') 
+    : null;
+  
+  const [selectedMode, setSelectedMode] = useState(urlMode || 'general');
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -21,6 +43,11 @@ export default function App() {
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [tone, setTone] = useState('youdecide');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAnswersModal, setShowAnswersModal] = useState(false);
+  const [showRewriteModal, setShowRewriteModal] = useState(false);
+  const [rewriteTone, setRewriteTone] = useState(null);
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false); // Internal state for generation
   const { user, signOut: supabaseSignOut, isAuthenticated, loading: authLoading } = useAuth();
 
   // Handle sign out with proper state reset
@@ -33,7 +60,7 @@ export default function App() {
       console.error('Sign out error:', err);
     } finally {
       // Always reset app state, regardless of whether signOut succeeded
-      setView('landing');
+      navigate('/');
       setSavedLetters([]);
       setLetter('');
       setHasLetter(false);
@@ -60,6 +87,9 @@ export default function App() {
   const [letterSaveStatus, setLetterSaveStatus] = useState(null); // 'saving', 'saved', 'error'
   const [letterSort, setLetterSort] = useState('newest'); // 'newest', 'oldest', 'mode'
   const [selectedForCompare, setSelectedForCompare] = useState([]); // IDs of selected letters
+  const [comparisonResult, setComparisonResult] = useState(null);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
 
   // Quick Letter questions with pre-written options
   const quickQuestions = [
@@ -205,6 +235,17 @@ export default function App() {
     }
   }, [selectedMode]);
 
+  // Sync selectedMode with URL when navigating directly to /write/:mode
+  useEffect(() => {
+    if (urlMode && urlMode !== selectedMode && urlMode !== 'quick') {
+      setSelectedMode(urlMode);
+      setCurrentIndex(0);
+      setAnswers({});
+      setFollowUpOpen({});
+      setFollowUpAnswers({});
+    }
+  }, [urlMode]);
+
   // Auto-focus textarea when question changes
   useEffect(() => {
     if (view === 'interview' && textareaRef.current) {
@@ -224,11 +265,11 @@ export default function App() {
   // Handle starting the interview
   const startInterview = (mode) => {
     setSelectedMode(mode);
-    setView('interview');
     setCurrentIndex(0);
     setAnswers({});
     setFollowUpOpen({});
     setFollowUpAnswers({});
+    navigate(`/write/${mode}`);
   };
 
   // Start quick letter
@@ -236,12 +277,20 @@ export default function App() {
     setIsQuickMode(true);
     setQuickIndex(0);
     setQuickAnswers({});
-    setView('quick-interview');
+    navigate('/write/quick');
   };
 
-  // Scroll to modes section
+  // Scroll to modes section (and navigate to landing if needed)
   const scrollToModes = () => {
-    modesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Wait for navigation then scroll
+      setTimeout(() => {
+        modesRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      modesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Handle answer change
@@ -270,7 +319,7 @@ export default function App() {
       setCurrentIndex(prev => prev + 1);
     } else {
       if (hasSafetyContent()) {
-        setView('crisis');
+        navigate('/crisis');
       } else {
         generateLetter();
       }
@@ -293,7 +342,7 @@ export default function App() {
 
   // Generate the letter
   const generateLetter = async () => {
-    setView('generating');
+    setIsGenerating(true);
     setError(null);
     setLetterSaveStatus(null);
 
@@ -350,7 +399,8 @@ export default function App() {
 
       setLetter(data.letter);
       setHasLetter(true);
-      setView('letter');
+      setIsGenerating(false);
+      navigate('/letter');
       
       // Scroll to top when letter is displayed
       window.scrollTo(0, 0);
@@ -362,14 +412,14 @@ export default function App() {
     } catch (err) {
       console.error('Generation error:', err);
       setError(`Something went wrong: ${err.message}. Please try again.`);
-      setView('interview');
+      setIsGenerating(false);
       setCurrentIndex(questions.length - 1);
     }
   };
 
   // Generate quick letter
   const generateQuickLetter = async () => {
-    setView('generating');
+    setIsGenerating(true);
     setError(null);
     setLetterSaveStatus(null);
 
@@ -410,7 +460,8 @@ export default function App() {
       setLetter(data.letter);
       setHasLetter(true);
       setIsQuickMode(false);
-      setView('letter');
+      setIsGenerating(false);
+      navigate('/letter');
       
       // Scroll to top when letter is displayed
       window.scrollTo(0, 0);
@@ -422,7 +473,7 @@ export default function App() {
     } catch (err) {
       console.error('Generation error:', err);
       setError(`Something went wrong: ${err.message}. Please try again.`);
-      setView('quick-interview');
+      setIsGenerating(false);
     }
   };
 
@@ -453,9 +504,91 @@ export default function App() {
     window.print();
   };
 
+  // Print letter
+  const printLetter = () => {
+    window.print();
+  };
+
+  // Get formatted answers for display
+  const getFormattedAnswers = () => {
+    return questions.map((q, i) => ({
+      question: q.prompt,
+      answer: answers[q.id] || '[skipped]',
+      followUp: q.followUp && followUpOpen[q.id] ? {
+        question: q.followUp,
+        answer: followUpAnswers[q.id] || ''
+      } : null
+    }));
+  };
+
+  // Rewrite letter in different tone
+  const rewriteLetter = async (newTone) => {
+    setIsRewriting(true);
+    setShowRewriteModal(false);
+    setIsGenerating(true);
+
+    try {
+      const qaPairs = questions.map((q, i) => {
+        const answer = answers[q.id]?.trim() || '[skipped]';
+        const followUpAnswer = followUpAnswers[q.id]?.trim();
+
+        let text = `Q${i + 1}: ${q.prompt}\nA${i + 1}: ${answer}`;
+        if (q.followUp && followUpOpen[q.id] && followUpAnswer) {
+          text += `\n\nFollow-up: ${q.followUp}\nAnswer: ${followUpAnswer}`;
+        }
+        return text;
+      }).join('\n\n---\n\n');
+
+      const modeName = modes.find(m => m.id === selectedMode)?.name ||
+                       lifeEventModes.find(m => m.id === selectedMode)?.name ||
+                       'General Reflection';
+
+      const response = await fetch('/.netlify/functions/generate-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: selectedMode,
+          modeName: modeName,
+          tone: newTone,
+          qaPairs
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rewrite letter');
+      }
+
+      const data = await response.json();
+      setLetter(data.letter);
+      setTone(newTone);
+      setIsGenerating(false);
+      navigate('/letter');
+      window.scrollTo(0, 0);
+
+      // Save the rewritten letter
+      if (user) {
+        const questionsData = questions.map((q) => ({
+          question: q.prompt,
+          answer: answers[q.id] || '[skipped]',
+          followUp: q.followUp && followUpOpen[q.id] ? {
+            question: q.followUp,
+            answer: followUpAnswers[q.id] || ''
+          } : null
+        }));
+        await saveLetter(data.letter, selectedMode, newTone, questionsData);
+      }
+    } catch (err) {
+      console.error('Rewrite error:', err);
+      setError('Failed to rewrite letter. Please try again.');
+      setIsGenerating(false);
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
   // Start over
   const startOver = () => {
-    setView('landing');
+    navigate('/');
     setSelectedMode('general');
     setQuestions([]);
     setCurrentIndex(0);
@@ -547,13 +680,13 @@ export default function App() {
     setTone(savedLetter.tone || 'warm');
     setHasLetter(true);
     setLetterSaveStatus('saved'); // Already saved
-    setView('letter');
+    navigate('/letter');
     window.scrollTo(0, 0);
   };
 
   // Fetch letters when user logs in or when viewing Your Letters
   useEffect(() => {
-    if (view === 'your-letters') {
+    if (location.pathname === '/your-letters') {
       // Wait for auth to finish loading before making any decisions
       if (authLoading) {
         setLettersLoading(true);
@@ -567,14 +700,14 @@ export default function App() {
         setSavedLetters([]);
       }
     }
-  }, [user, view, authLoading]);
+  }, [user, location.pathname, authLoading]);
 
   // Reset compare selection when leaving the page
   useEffect(() => {
-    if (view !== 'your-letters') {
+    if (location.pathname !== '/your-letters') {
       setSelectedForCompare([]);
     }
-  }, [view]);
+  }, [location.pathname]);
 
   // Toggle letter selection for comparison
   const toggleLetterSelection = (letterId) => {
@@ -602,6 +735,58 @@ export default function App() {
     }
   };
 
+  // Compare two letters
+  const compareLetters = async () => {
+    if (selectedForCompare.length !== 2) return;
+    
+    const letter1 = savedLetters.find(l => l.id === selectedForCompare[0]);
+    const letter2 = savedLetters.find(l => l.id === selectedForCompare[1]);
+    
+    if (!letter1 || !letter2) return;
+    
+    setComparisonLoading(true);
+    setShowComparison(true);
+    setComparisonResult(null);
+    
+    try {
+      const response = await fetch('/.netlify/functions/compare-letters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          letter1: {
+            content: letter1.letter_content,
+            mode: letter1.mode,
+            date: letter1.created_at
+          },
+          letter2: {
+            content: letter2.letter_content,
+            mode: letter2.mode,
+            date: letter2.created_at
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to compare letters');
+      }
+      
+      const data = await response.json();
+      setComparisonResult(data.comparison);
+    } catch (err) {
+      console.error('Comparison error:', err);
+      setComparisonResult('Unable to generate comparison. Please try again.');
+    } finally {
+      setComparisonLoading(false);
+    }
+  };
+
+  // Close comparison view
+  const closeComparison = () => {
+    setShowComparison(false);
+    setComparisonResult(null);
+    setSelectedForCompare([]);
+  };
+
   // Current question
   const currentQuestion = questions[currentIndex];
 
@@ -621,16 +806,8 @@ export default function App() {
   // Letter type details for landing page
   const letterTypes = [
     {
-      id: 'original',
-      icon: '✦',
-      name: 'The Original',
-      tagline: 'The deep questions that started it all',
-      description: 'Ten profound questions designed to surface what\'s been hiding beneath the surface. This is the reflection that launched Letter to You — raw, searching, and deeply personal.',
-      bestFor: 'When you\'re ready to go deep and meet yourself honestly'
-    },
-    {
       id: 'general',
-      icon: '○',
+      icon: '◎',
       name: 'General Reflection',
       tagline: 'A broad exploration of where you are right now',
       description: 'For when you need to step back and take stock. This letter helps you see patterns across your whole life — what\'s working, what\'s not, and what might need attention.',
@@ -659,6 +836,14 @@ export default function App() {
       tagline: 'For when you\'re between chapters',
       description: 'For the in-between moments — ending something, starting something, or suspended in uncertainty. Helps you find footing when the ground is shifting.',
       bestFor: 'Major life changes, loss, new beginnings, or feeling unmoored'
+    },
+    {
+      id: 'original',
+      icon: '✦',
+      name: 'The Original',
+      tagline: 'The deep questions that started it all',
+      description: 'Ten profound questions designed to surface what\'s been hiding beneath the surface. This is the reflection that launched Letter to You — raw, searching, and deeply personal.',
+      bestFor: 'When you\'re ready to go deep and meet yourself honestly'
     }
   ];
 
@@ -707,25 +892,31 @@ export default function App() {
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-inner">
-          <button className="nav-brand" onClick={() => setView('landing')}>
+          <button className="nav-brand" onClick={() => navigate('/')}>
             Letter to You
           </button>
           <div className="nav-links">
             <button
-              className={`nav-link ${view === 'how-it-works' ? 'active' : ''}`}
-              onClick={() => setView('how-it-works')}
+              className="nav-link write-letter-link"
+              onClick={scrollToModes}
+            >
+              Write your letter
+            </button>
+            <button
+              className={`nav-link ${location.pathname === '/how-it-works' ? 'active' : ''}`}
+              onClick={() => navigate('/how-it-works')}
             >
               How it works
             </button>
             <button
-              className={`nav-link ${view === 'resources' ? 'active' : ''}`}
-              onClick={() => setView('resources')}
+              className={`nav-link ${location.pathname === '/resources' ? 'active' : ''}`}
+              onClick={() => navigate('/resources')}
             >
               Resources
             </button>
             <button
-              className={`nav-link ${view === 'your-letters' ? 'active' : ''}`}
-              onClick={() => setView('your-letters')}
+              className={`nav-link ${location.pathname === '/your-letters' ? 'active' : ''}`}
+              onClick={() => navigate('/your-letters')}
             >
               Your letters
             </button>
@@ -941,7 +1132,7 @@ export default function App() {
               </div>
             </div>
 
-            <button className="btn primary" onClick={() => setView('landing')}>
+            <button className="btn primary" onClick={scrollToModes}>
               Begin your reflection
             </button>
           </div>
@@ -1022,7 +1213,7 @@ export default function App() {
               )}
             </section>
 
-            <button className="btn text back-btn" onClick={() => setView('landing')}>
+            <button className="btn text back-btn" onClick={() => navigate('/')}>
               ← Back to home
             </button>
           </div>
@@ -1074,11 +1265,7 @@ export default function App() {
               {quickIndex === quickQuestions.length - 1 ? (
                 <button
                   className="btn primary"
-                  onClick={() => {
-                    // Generate quick letter
-                    setView('generating');
-                    generateQuickLetter();
-                  }}
+                  onClick={generateQuickLetter}
                   disabled={!quickAnswers[quickQuestions[quickIndex].id]}
                 >
                   Generate letter
@@ -1098,7 +1285,7 @@ export default function App() {
               className="btn text back-btn"
               onClick={() => {
                 setIsQuickMode(false);
-                setView('landing');
+                navigate('/');
               }}
             >
               ← Back to home
@@ -1251,9 +1438,9 @@ export default function App() {
         </div>
       )}
 
-      {/* Generating */}
-      {view === 'generating' && (
-        <div className="view generating">
+      {/* Generating Overlay */}
+      {isGenerating && (
+        <div className="generating-overlay">
           <div className="generating-content">
             <div className="generating-animation">
               <span className="dot"></span>
@@ -1272,14 +1459,14 @@ export default function App() {
           <div className="letter-container">
             {/* Top action buttons */}
             <div className="letter-actions letter-actions-top">
-              <button className="btn secondary" onClick={copyLetter}>
-                Copy text
+              <button className="btn secondary" onClick={printLetter}>
+                🖨 Print
               </button>
-              <button className="btn secondary" onClick={downloadLetter}>
-                Download .txt
+              <button className="btn secondary" onClick={() => setShowAnswersModal(true)}>
+                📝 My Answers
               </button>
-              <button className="btn primary" onClick={saveToPdf}>
-                Save as PDF
+              <button className="btn secondary" onClick={() => setShowRewriteModal(true)}>
+                ✎ Rewrite
               </button>
             </div>
 
@@ -1296,8 +1483,7 @@ export default function App() {
 
               <div className="letter-decorative-line"></div>
 
-              <h1>A letter to you</h1>
-              <p className="letter-from">From a friend who sees you</p>
+              <h1>A letter to you, from you</h1>
               <div className="letter-body">
                 {letter.split('\n\n').map((paragraph, i) => (
                   <p key={i}>{paragraph}</p>
@@ -1305,8 +1491,8 @@ export default function App() {
               </div>
 
               <div className="letter-closing">
-                <p className="closing-line">—</p>
-                <p className="closing-text">Written with care, based on your words.</p>
+                <p className="closing-signoff">Sincerely,</p>
+                <p className="closing-me">me</p>
               </div>
 
               {/* Print footer - only shows in PDF */}
@@ -1366,6 +1552,7 @@ export default function App() {
             {authLoading || lettersLoading ? (
               <div className="letters-loading">
                 <p>Loading your letters...</p>
+                <p className="loading-note">This can take 30 seconds, please be patient.</p>
               </div>
             ) : !user ? (
               <div className="letters-signin-prompt">
@@ -1555,7 +1742,7 @@ export default function App() {
                         <div className="sarah-letter-check"></div>
                         <div className="sarah-letter-content">
                           <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">○</span>
+                            <span className="sarah-letter-icon">◎</span>
                             <div className="sarah-letter-meta">
                               <span className="sarah-letter-type">General Reflection</span>
                               <span className="sarah-letter-date">September 2025</span>
@@ -1614,7 +1801,7 @@ export default function App() {
                 <div className="cta-section">
                   <h2>Start building your collection</h2>
                   <p>Each letter becomes a snapshot of where you are. Over time, you'll see how far you've come.</p>
-                  <button className="btn primary" onClick={() => setView('landing')}>Create Your First Letter</button>
+                  <button className="btn primary" onClick={scrollToModes}>Create Your First Letter</button>
                 </div>
               </div>
             ) : (
@@ -1641,10 +1828,7 @@ export default function App() {
                     <p>2 letters selected</p>
                     <button 
                       className="btn primary compare-btn"
-                      onClick={() => {
-                        // Future: implement comparison view
-                        alert('Compare feature coming soon! This will show what has changed between your selected letters.');
-                      }}
+                      onClick={compareLetters}
                     >
                       What Has Changed?
                     </button>
@@ -1665,7 +1849,7 @@ export default function App() {
                   {getSortedLetters().map((savedLetter) => {
                     const modeInfo = modes.find(m => m.id === savedLetter.mode) ||
                                      lifeEventModes.find(m => m.id === savedLetter.mode) ||
-                                     { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '○' };
+                                     { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '◎' };
                     const date = new Date(savedLetter.created_at);
                     const isSelected = selectedForCompare.includes(savedLetter.id);
                     
@@ -1684,7 +1868,7 @@ export default function App() {
                         </div>
                         <div className="saved-letter-content">
                           <div className="saved-letter-header">
-                            <span className="saved-letter-icon">{modeInfo.icon || '○'}</span>
+                            <span className="saved-letter-icon">{modeInfo.icon || '◎'}</span>
                             <div className="saved-letter-meta">
                               <span className="saved-letter-type">{modeInfo.name}</span>
                               <span className="saved-letter-date">
@@ -1703,10 +1887,6 @@ export default function App() {
                               </span>
                             )}
                           </div>
-                          
-                          <p className="saved-letter-preview">
-                            {savedLetter.letter_content.substring(0, 200)}...
-                          </p>
                           
                           <div className="saved-letter-actions">
                             <button
@@ -1733,7 +1913,7 @@ export default function App() {
                 </div>
 
                 <div className="letters-footer">
-                  <button className="btn secondary" onClick={() => setView('landing')}>
+                  <button className="btn secondary" onClick={scrollToModes}>
                     Create new letter
                   </button>
                 </div>
@@ -1768,6 +1948,95 @@ export default function App() {
             <button className="btn text" onClick={startOver}>
               Return to start
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Answers Modal */}
+      {showAnswersModal && (
+        <div className="modal-overlay">
+          <div className="modal-content answers-modal">
+            <button className="modal-close" onClick={() => setShowAnswersModal(false)}>×</button>
+            <h2>Your Answers</h2>
+            <div className="answers-list">
+              {getFormattedAnswers().map((item, i) => (
+                <div key={i} className="answer-item">
+                  <p className="answer-question">{item.question}</p>
+                  <p className="answer-text">{item.answer}</p>
+                  {item.followUp && (
+                    <div className="answer-followup">
+                      <p className="answer-question">{item.followUp.question}</p>
+                      <p className="answer-text">{item.followUp.answer}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button className="btn secondary" onClick={() => setShowAnswersModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rewrite Modal */}
+      {showRewriteModal && (
+        <div className="modal-overlay">
+          <div className="modal-content rewrite-modal">
+            <button className="modal-close" onClick={() => setShowRewriteModal(false)}>×</button>
+            <h2>Rewrite in a Different Voice</h2>
+            <p className="rewrite-intro">Choose a new tone for your letter. We'll regenerate it using your same answers.</p>
+            <div className="rewrite-tone-options">
+              {toneOptions.filter(t => t.id !== 'youdecide').map(option => (
+                <button
+                  key={option.id}
+                  className={`rewrite-tone-btn ${tone === option.id ? 'current' : ''}`}
+                  onClick={() => rewriteLetter(option.id)}
+                  disabled={tone === option.id}
+                >
+                  <span className="tone-icon">{option.icon}</span>
+                  <span className="tone-name">{option.name}</span>
+                  <span className="tone-desc">{option.description}</span>
+                  {tone === option.id && <span className="current-badge">Current</span>}
+                </button>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button className="btn text" onClick={() => setShowRewriteModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Modal */}
+      {showComparison && (
+        <div className="comparison-overlay">
+          <div className="comparison-modal">
+            <button className="comparison-close" onClick={closeComparison}>×</button>
+            <h2>What Has Changed</h2>
+            
+            {comparisonLoading ? (
+              <div className="comparison-loading">
+                <p>Analyzing your letters...</p>
+                <p className="loading-note">This may take a moment</p>
+              </div>
+            ) : comparisonResult ? (
+              <div className="comparison-content">
+                {comparisonResult.split('\n\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            ) : null}
+            
+            <div className="comparison-actions">
+              <button className="btn secondary" onClick={closeComparison}>
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
