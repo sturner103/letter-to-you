@@ -669,6 +669,13 @@ export default function App() {
       if (error) throw error;
       
       setLetterSaveStatus('saved');
+      
+      // Update cache with new letter at the beginning
+      const cacheKey = `letters_${user.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      const cachedLetters = cached ? JSON.parse(cached) : [];
+      localStorage.setItem(cacheKey, JSON.stringify([data, ...cachedLetters]));
+      
       return data;
     } catch (err) {
       console.error('Error saving letter:', err);
@@ -677,12 +684,26 @@ export default function App() {
     }
   };
 
-  // Fetch user's saved letters
+  // Fetch user's saved letters with localStorage caching
   const fetchSavedLetters = async () => {
     if (!user) return;
     
     setLettersLoading(true);
     
+    // Try to load from localStorage first for instant display
+    const cacheKey = `letters_${user.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const cachedLetters = JSON.parse(cached);
+        setSavedLetters(cachedLetters);
+        setLettersLoading(false); // Show cached immediately
+      } catch (e) {
+        console.error('Error parsing cached letters:', e);
+      }
+    }
+    
+    // Then fetch fresh data from database
     try {
       const { data, error } = await supabase
         .from('letters')
@@ -693,6 +714,8 @@ export default function App() {
       if (error) throw error;
       
       setSavedLetters(data || []);
+      // Update cache
+      localStorage.setItem(cacheKey, JSON.stringify(data || []));
     } catch (err) {
       console.error('Error fetching letters:', err);
     } finally {
@@ -713,7 +736,10 @@ export default function App() {
 
       if (error) throw error;
       
-      setSavedLetters(prev => prev.filter(l => l.id !== letterId));
+      const updatedLetters = savedLetters.filter(l => l.id !== letterId);
+      setSavedLetters(updatedLetters);
+      // Update cache
+      localStorage.setItem(`letters_${user.id}`, JSON.stringify(updatedLetters));
     } catch (err) {
       console.error('Error deleting letter:', err);
     }
@@ -730,6 +756,24 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  // Load cached letters immediately when visiting Your Letters
+  useEffect(() => {
+    if (location.pathname === '/your-letters') {
+      // Try to load from any existing cache while auth loads
+      const cachedKeys = Object.keys(localStorage).filter(k => k.startsWith('letters_'));
+      if (cachedKeys.length > 0 && savedLetters.length === 0) {
+        try {
+          const cached = localStorage.getItem(cachedKeys[0]);
+          if (cached) {
+            setSavedLetters(JSON.parse(cached));
+          }
+        } catch (e) {
+          console.error('Error loading cached letters:', e);
+        }
+      }
+    }
+  }, [location.pathname]);
+
   // Fetch letters when user logs in or when viewing Your Letters
   useEffect(() => {
     if (location.pathname === '/your-letters') {
@@ -744,6 +788,9 @@ export default function App() {
       } else {
         setLettersLoading(false);
         setSavedLetters([]);
+        // Clear cache if logged out
+        const cachedKeys = Object.keys(localStorage).filter(k => k.startsWith('letters_'));
+        cachedKeys.forEach(k => localStorage.removeItem(k));
       }
     }
   }, [user, location.pathname, authLoading]);
