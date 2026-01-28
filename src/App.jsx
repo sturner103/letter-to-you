@@ -87,6 +87,7 @@ export default function App() {
   const [lettersLoading, setLettersLoading] = useState(false);
   const [letterSaveStatus, setLetterSaveStatus] = useState(null); // 'saving', 'saved', 'error'
   const [letterSort, setLetterSort] = useState('newest'); // 'newest', 'oldest', 'mode'
+  const [compareMode, setCompareMode] = useState(false); // Whether compare mode is active
   const [selectedForCompare, setSelectedForCompare] = useState([]); // IDs of selected letters
   const [comparisonResult, setComparisonResult] = useState(null);
   const [comparisonLoading, setComparisonLoading] = useState(false);
@@ -799,6 +800,7 @@ export default function App() {
   useEffect(() => {
     if (location.pathname !== '/your-letters') {
       setSelectedForCompare([]);
+      setCompareMode(false);
     }
   }, [location.pathname]);
 
@@ -878,6 +880,32 @@ export default function App() {
     setShowComparison(false);
     setComparisonResult(null);
     setSelectedForCompare([]);
+    setCompareMode(false);
+  };
+
+  // Cancel compare mode
+  const cancelCompareMode = () => {
+    setCompareMode(false);
+    setSelectedForCompare([]);
+  };
+
+  // Get compare button state
+  const getCompareButtonState = () => {
+    if (!compareMode) return 'inactive';
+    if (selectedForCompare.length === 2) return 'ready';
+    return 'active';
+  };
+
+  // Get a snippet from letter content
+  const getLetterSnippet = (content, maxLength = 120) => {
+    if (!content) return '';
+    // Remove "Dear me," if present and get first meaningful text
+    let text = content.replace(/^Dear me,?\s*/i, '').trim();
+    if (text.length <= maxLength) return `"${text}"`;
+    // Find a good break point
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return `"${truncated.substring(0, lastSpace)}..."`;
   };
 
   // Current question
@@ -1524,11 +1552,11 @@ export default function App() {
         <div className="view your-letters-view">
           <div className="your-letters-container">
             <h1>Your Letters</h1>
+            <p className="your-letters-subtitle">Click any letter to read, print, or share it</p>
             
             {authLoading || lettersLoading ? (
               <div className="letters-loading">
                 <p>Loading your letters...</p>
-                <p className="loading-note">This can take 30 seconds, please be patient.</p>
               </div>
             ) : !user ? (
               <div className="letters-signin-prompt">
@@ -1538,351 +1566,113 @@ export default function App() {
                 </button>
               </div>
             ) : savedLetters.length === 0 ? (
-              <div className="letters-empty">
-                {/* Feature Items */}
-                <div className="feature-items-grid">
-                  <div className="feature-item-card">
-                    <span className="feature-icon">📁</span>
-                    <span className="feature-text">Save & organize all your letters</span>
-                  </div>
-                  <div className="feature-item-card">
-                    <span className="feature-icon">📅</span>
-                    <span className="feature-text">Schedule letters to your future self</span>
-                  </div>
-                  <div className="feature-item-card">
-                    <span className="feature-icon">📊</span>
-                    <span className="feature-text">Track your reflections over time</span>
-                  </div>
-                  <div className="feature-item-card">
-                    <span className="feature-icon">💡</span>
-                    <span className="feature-text">Weekly check-ins & progress insights</span>
-                  </div>
-                </div>
-
-                {/* Sarah's Preview Section */}
-                <div className="preview-section">
-                  <div className="preview-banner">
-                    <p>See what's possible — here's <span className="sarah-name">Sarah's</span> letter collection</p>
-                  </div>
-                  
-                  <div className="sarah-collection">
-                    {/* Stats & Actions Header */}
-                    <div className="sarah-header">
-                      <div className="sarah-stats">
-                        <div className="sarah-stat">
-                          <span className="sarah-stat-number">6</span>
-                          <span className="sarah-stat-label">Letters</span>
-                        </div>
-                        <div className="sarah-stat">
-                          <span className="sarah-stat-number">4</span>
-                          <span className="sarah-stat-label">Reflection types</span>
-                        </div>
-                        <div className="sarah-stat">
-                          <span className="sarah-stat-number">5</span>
-                          <span className="sarah-stat-label">Months</span>
-                        </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="sarah-actions">
-                        <button className="action-btn">
-                          <span className="action-icon">⟷</span>
-                          Compare Two Letters
-                        </button>
-                        <button className="action-btn">
-                          <span className="action-icon">✎</span>
-                          Update Your Answers
-                        </button>
-                        <button className="action-btn">
-                          <span className="action-icon">📤</span>
-                          Export All
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Sarah's Letters */}
-                    <div className="sarah-letters">
-                      <div className="sarah-letter-card selected">
-                        <div className="sarah-letter-check">✓</div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">✦</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">The Original</span>
-                              <span className="sarah-letter-date">January 2026</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"You've been carrying something heavy lately — not the kind that shows, but the kind that sits in your chest when the room goes quiet..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="sarah-letter-card">
-                        <div className="sarah-letter-check"></div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">∞</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">Relationships & Connection</span>
-                              <span className="sarah-letter-date">December 2025</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"There's a pattern here worth naming: you give until you're empty, then wonder why no one notices you're gone..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="sarah-letter-card">
-                        <div className="sarah-letter-check"></div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">◈</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">Career & Meaning</span>
-                              <span className="sarah-letter-date">November 2025</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"You're not lazy — you're misaligned. The exhaustion isn't from working too hard; it's from working on the wrong things..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="sarah-letter-card selected">
-                        <div className="sarah-letter-check">✓</div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">⚡</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">Quick Reflection</span>
-                              <span className="sarah-letter-date">October 2025</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"Sometimes the bravest thing you can do is admit you're not okay. You did that today, and that matters..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="sarah-letter-card">
-                        <div className="sarah-letter-check"></div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">◎</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">General Reflection</span>
-                              <span className="sarah-letter-date">September 2025</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"Something in you is waking up — slowly, reluctantly, but unmistakably. You called it restlessness, but it might be closer to hope..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="sarah-letter-card">
-                        <div className="sarah-letter-check"></div>
-                        <div className="sarah-letter-content">
-                          <div className="sarah-letter-header">
-                            <span className="sarah-letter-icon">△</span>
-                            <div className="sarah-letter-meta">
-                              <span className="sarah-letter-type">Growth & Change</span>
-                              <span className="sarah-letter-date">August 2025</span>
-                            </div>
-                          </div>
-                          <p className="sarah-letter-snippet">"The person you were a year ago wouldn't recognize the questions you're asking now. That's not confusion — that's evolution..."</p>
-                          <div className="sarah-letter-actions">
-                            <button className="card-action-btn read-btn">
-                              <span className="btn-icon">📖</span>
-                              Read
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">📄</span>
-                              Save to PDF
-                            </button>
-                            <button className="card-action-btn">
-                              <span className="btn-icon">🖨</span>
-                              Print
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Final CTA */}
-                <div className="cta-section">
-                  <h2>Start building your collection</h2>
-                  <p>Each letter becomes a snapshot of where you are. Over time, you'll see how far you've come.</p>
-                  <button className="btn primary" onClick={scrollToModes}>Create Your First Letter</button>
-                </div>
+              <div className="letters-empty-simple">
+                <p>No letters yet</p>
+                <p className="empty-subtext">Your letters will appear here after you write them.</p>
+                <button className="btn primary" onClick={scrollToModes}>
+                  Write your first letter
+                </button>
               </div>
             ) : (
               <>
-                {/* Header with count and sorting */}
-                <div className="letters-header">
-                  <p className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</p>
-                  <div className="letters-controls">
-                    <select 
-                      className="letters-sort"
-                      value={letterSort}
-                      onChange={(e) => setLetterSort(e.target.value)}
+                {/* Controls row */}
+                <div className="letters-controls-row">
+                  <div className="letters-controls-left">
+                    <span className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</span>
+                    <button 
+                      className={`compare-mode-btn ${getCompareButtonState()}`}
+                      onClick={() => {
+                        if (getCompareButtonState() === 'ready') {
+                          compareLetters();
+                        } else if (getCompareButtonState() === 'inactive') {
+                          setCompareMode(true);
+                        }
+                      }}
                     >
-                      <option value="newest">Newest first</option>
-                      <option value="oldest">Oldest first</option>
-                      <option value="mode">By type</option>
-                    </select>
+                      Compare Letters
+                    </button>
                   </div>
+                  <select 
+                    className="letters-sort-select"
+                    value={letterSort}
+                    onChange={(e) => setLetterSort(e.target.value)}
+                  >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="mode">By type</option>
+                  </select>
                 </div>
 
-                {/* Compare button - shows when 2 letters selected */}
-                {selectedForCompare.length === 2 && (
-                  <div className="compare-banner">
-                    <p>2 letters selected</p>
-                    <button 
-                      className="btn primary compare-btn"
-                      onClick={compareLetters}
-                    >
-                      What Has Changed?
-                    </button>
-                    <button 
-                      className="btn text"
-                      onClick={() => setSelectedForCompare([])}
-                    >
-                      Clear selection
+                {/* Compare hint bar */}
+                {compareMode && (
+                  <div className="compare-hint-bar">
+                    <span>
+                      {selectedForCompare.length === 0 && 'Select 2 letters to compare how you\'ve changed'}
+                      {selectedForCompare.length === 1 && 'Select one more letter to compare'}
+                      {selectedForCompare.length === 2 && '2 letters selected — click Compare to see what\'s changed'}
+                    </span>
+                    <button className="cancel-compare-btn" onClick={cancelCompareMode}>
+                      Cancel
                     </button>
                   </div>
                 )}
 
-                {selectedForCompare.length === 1 && (
-                  <p className="compare-hint">Select one more letter to compare</p>
-                )}
-
-                <div className="letters-list">
+                {/* Letters list */}
+                <div className="letters-card-list">
                   {getSortedLetters().map((savedLetter) => {
                     const modeInfo = modes.find(m => m.id === savedLetter.mode) ||
                                      lifeEventModes.find(m => m.id === savedLetter.mode) ||
                                      { name: savedLetter.mode === 'quick' ? 'Quick Reflection' : 'Reflection', icon: '◎' };
                     const date = new Date(savedLetter.created_at);
                     const isSelected = selectedForCompare.includes(savedLetter.id);
+                    const toneLabel = savedLetter.tone ? 
+                      savedLetter.tone.charAt(0).toUpperCase() + savedLetter.tone.slice(1) : 
+                      'Warm';
                     
                     return (
                       <div 
                         key={savedLetter.id} 
-                        className={`saved-letter-card ${isSelected ? 'selected' : ''}`}
+                        className={`letter-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          if (compareMode) {
+                            toggleLetterSelection(savedLetter.id);
+                          } else {
+                            viewSavedLetter(savedLetter);
+                          }
+                        }}
                       >
-                        <div className="saved-letter-select">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleLetterSelection(savedLetter.id)}
-                            disabled={!isSelected && selectedForCompare.length >= 2}
-                          />
-                        </div>
-                        <div className="saved-letter-content">
-                          <div className="saved-letter-header">
-                            <span className="saved-letter-icon">{modeInfo.icon || '◎'}</span>
-                            <div className="saved-letter-meta">
-                              <span className="saved-letter-type">{modeInfo.name}</span>
-                              <span className="saved-letter-date">
+                        <div className="letter-card-main">
+                          <div className="letter-card-tone">Tone: <span>{toneLabel}</span></div>
+                          <div className="letter-card-header">
+                            {compareMode && (
+                              <input
+                                type="checkbox"
+                                className="letter-card-checkbox"
+                                checked={isSelected}
+                                onChange={() => toggleLetterSelection(savedLetter.id)}
+                                disabled={!isSelected && selectedForCompare.length >= 2}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            )}
+                            <div className="letter-card-info">
+                              <div className="letter-card-mode">
+                                <span className="letter-card-icon">{modeInfo.icon || '◎'}</span>
+                                {modeInfo.name}
+                              </div>
+                              <div className="letter-card-date">
                                 {date.toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'
                                 })}
-                              </span>
+                              </div>
                             </div>
-                            {savedLetter.tone && (
-                              <span className="saved-letter-tone">
-                                {savedLetter.tone === 'warm' && '♡'}
-                                {savedLetter.tone === 'direct' && '◇'}
-                                {savedLetter.tone === 'motivating' && '↗'}
-                              </span>
-                            )}
                           </div>
-                          
-                          <div className="saved-letter-actions">
-                            <button
-                              className="btn secondary"
-                              onClick={() => viewSavedLetter(savedLetter)}
-                            >
-                              Read letter
-                            </button>
-                            <button
-                              className="btn text delete-btn"
-                              onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this letter?')) {
-                                  deleteLetter(savedLetter.id);
-                                }
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </div>
+                          <p className={`letter-card-snippet ${compareMode ? 'with-checkbox' : ''}`}>
+                            {getLetterSnippet(savedLetter.letter_content)}
+                          </p>
                         </div>
+                        <span className="letter-card-arrow">→</span>
                       </div>
                     );
                   })}
@@ -1890,7 +1680,7 @@ export default function App() {
 
                 <div className="letters-footer">
                   <button className="btn secondary" onClick={scrollToModes}>
-                    Create new letter
+                    Write a new letter
                   </button>
                 </div>
               </>

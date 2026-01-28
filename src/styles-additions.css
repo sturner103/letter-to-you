@@ -1182,310 +1182,287 @@
   color: var(--text-secondary);
 }
 
-/* Sarah's Preview Section */
-.preview-section {
-  position: relative;
+/* ==========================================
+   YOUR LETTERS - NEW CARD DESIGN
+   ========================================== */
+
+.your-letters-subtitle {
+  color: #6b7c6e;
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  text-align: left;
 }
 
-.preview-banner {
+/* Simple empty state */
+.letters-empty-simple {
   text-align: center;
-  padding: 20px;
-  background: linear-gradient(90deg, transparent, rgba(139, 126, 108, 0.1), transparent);
-  margin-bottom: 24px;
-  border-radius: 8px;
+  padding: 60px 20px;
 }
 
-.preview-banner p {
-  font-size: 1rem;
-  color: #6B6860;
-  margin: 0;
-}
-
-.preview-banner .sarah-name {
-  font-weight: 600;
-  color: #5D5A55;
-}
-
-/* Sarah's Collection - Muted Overlay */
-.sarah-collection {
-  position: relative;
-  opacity: 0.55;
-  pointer-events: none;
-  user-select: none;
-}
-
-.sarah-collection::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(250, 249, 247, 0.3) 100%);
-  pointer-events: none;
-}
-
-/* Sarah's Stats & Actions Header */
-.sarah-header {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.sarah-stats {
-  display: flex;
-  justify-content: center;
-  gap: 48px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #E8E5E0;
-  margin-bottom: 20px;
-}
-
-.sarah-stat {
-  text-align: center;
-}
-
-.sarah-stat-number {
-  display: block;
-  font-size: 1.8rem;
-  font-weight: 300;
+.letters-empty-simple > p:first-child {
+  font-size: 1.2rem;
   color: var(--text-primary);
-}
-
-.sarah-stat-label {
-  font-size: 0.8rem;
-  color: #8B7E6C;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Action Buttons Row */
-.sarah-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: #F5F3F0;
-  border: 1px solid #E0DCD6;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  color: #5D5A55;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.action-btn:hover {
-  background: #EBE8E3;
-  border-color: #D4CFC6;
-}
-
-.action-btn .action-icon {
-  font-size: 1.1rem;
-}
-
-/* Sarah's Letters */
-.sarah-letters {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sarah-letter-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-.sarah-letter-card.selected {
-  background: #F8F6F3;
-  border: 1px solid #D4CFC6;
-}
-
-.sarah-letter-check {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #D4CFC6;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: #8B7E6C;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.sarah-letter-card.selected .sarah-letter-check {
-  background: #8B7E6C;
-  border-color: #8B7E6C;
-  color: white;
-}
-
-.sarah-letter-content {
-  flex: 1;
-}
-
-.sarah-letter-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   margin-bottom: 8px;
 }
 
-.sarah-letter-icon {
-  font-size: 1.2rem;
-  color: #8B7E6C;
-}
-
-.sarah-letter-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sarah-letter-type {
-  font-weight: 500;
+.letters-empty-simple .empty-subtext {
+  color: #8a847d;
   font-size: 0.95rem;
-  color: var(--text-primary);
+  margin-bottom: 24px;
 }
 
-.sarah-letter-date {
-  font-size: 0.8rem;
-  color: #9A958E;
-}
-
-.sarah-letter-snippet {
-  font-size: 0.9rem;
-  color: #6B6860;
-  line-height: 1.5;
-  font-style: italic;
-  margin-bottom: 12px;
-}
-
-/* Card Actions */
-.sarah-letter-actions {
+/* Controls row */
+.letters-controls-row {
   display: flex;
-  gap: 8px;
-}
-
-.card-action-btn {
-  display: inline-flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  border: 1px solid #E0DCD6;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 0.8rem;
-  color: #6B6860;
-  cursor: pointer;
-  transition: all 0.2s;
+  margin-bottom: 20px;
 }
 
-.card-action-btn:hover {
-  background: #F5F3F0;
-  border-color: #D4CFC6;
+.letters-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.card-action-btn .btn-icon {
+.letters-count {
   font-size: 0.9rem;
+  color: #8a847d;
 }
 
-.card-action-btn.read-btn {
-  background: var(--text-primary);
-  border-color: var(--text-primary);
+/* Compare mode button states */
+.compare-mode-btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.compare-mode-btn.inactive {
+  background: #f0ede8;
+  color: #8a847d;
+  border: 1px solid #e5e1db;
+}
+
+.compare-mode-btn.inactive:hover {
+  background: #e8e4dd;
+  color: #6b7c6e;
+}
+
+.compare-mode-btn.active {
+  background: #d4e4d9;
+  color: #4a5f4e;
+  border: 1px solid #b8d4be;
+}
+
+.compare-mode-btn.ready {
+  background: #2c2825;
   color: white;
+  border: 1px solid #2c2825;
 }
 
-.card-action-btn.read-btn:hover {
+.compare-mode-btn.ready:hover {
   background: #1a1816;
 }
 
-/* CTA Section */
-.cta-section {
-  text-align: center;
-  padding: 40px 32px;
+.letters-sort-select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border: 1px solid #d4d0c8;
+  border-radius: 4px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  color: #2c2825;
+  cursor: pointer;
 }
 
-.cta-section h2 {
-  font-size: 1.4rem;
-  font-weight: 400;
+/* Compare hint bar */
+.compare-hint-bar {
+  font-size: 0.85rem;
+  color: #6b7c6e;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #f5f8f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cancel-compare-btn {
+  background: none;
+  border: none;
+  color: #8a847d;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.cancel-compare-btn:hover {
+  color: #5a5652;
+}
+
+/* Letter cards list */
+.letters-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual letter card */
+.letter-card {
+  background: white;
+  border: 1px solid #e5e1db;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.letter-card:hover {
+  border-color: #c4bfb8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.letter-card:hover .letter-card-arrow {
+  color: #6b7c6e;
+  transform: translateX(2px);
+}
+
+.letter-card.selected {
+  border-color: #6b7c6e;
+  background: #faf9f7;
+}
+
+/* Card main content */
+.letter-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Card header */
+.letter-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 12px;
-  color: var(--text-primary);
 }
 
-.cta-section p {
+.letter-card-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6b7c6e;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.letter-card-info {
+  flex: 1;
+  text-align: left;
+}
+
+.letter-card-mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1rem;
-  color: #6B6860;
-  margin-bottom: 24px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-/* Mobile adjustments for Sarah's preview */
+.letter-card-icon {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.letter-card-date {
+  font-size: 0.85rem;
+  color: #8a847d;
+  margin-top: 2px;
+}
+
+/* Tone in upper right */
+.letter-card-tone {
+  position: absolute;
+  top: 16px;
+  right: 48px;
+  font-size: 0.8rem;
+  color: #8a847d;
+}
+
+.letter-card-tone span {
+  color: #5a5652;
+}
+
+/* Snippet */
+.letter-card-snippet {
+  font-size: 0.9rem;
+  color: #5a5652;
+  line-height: 1.5;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: italic;
+}
+
+.letter-card-snippet.with-checkbox {
+  padding-left: 30px;
+}
+
+/* Arrow indicator */
+.letter-card-arrow {
+  color: #c4bfb8;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+/* Footer */
+.letters-footer {
+  margin-top: 32px;
+  text-align: left;
+}
+
+/* Mobile adjustments */
 @media (max-width: 768px) {
-  .feature-items-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .feature-strip {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  
-  .sarah-stats {
-    gap: 24px;
-  }
-  
-  .sarah-actions {
-    gap: 8px;
-  }
-  
-  .action-btn {
-    padding: 10px 16px;
-    font-size: 0.85rem;
-  }
-  
-  .sarah-letter-actions {
+  .letters-controls-row {
     flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .letters-controls-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .letters-sort-select {
+    width: 100%;
+  }
+  
+  .letter-card-tone {
+    position: static;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .letter-card {
+    padding: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .feature-strip {
-    grid-template-columns: 1fr;
-  }
-  
-  .sarah-stats {
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  
-  .sarah-actions {
+  .compare-hint-bar {
     flex-direction: column;
-  }
-  
-  .action-btn {
-    justify-content: center;
+    gap: 8px;
+    text-align: center;
   }
 }
 
