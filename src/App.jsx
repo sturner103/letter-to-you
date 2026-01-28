@@ -5,6 +5,13 @@ import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
+// Helper to check if error is an abort error (can be safely ignored)
+const isAbortError = (error) => {
+  return error?.name === 'AbortError' || 
+         error?.message?.includes('aborted') ||
+         error?.code === 'ABORT_ERR';
+};
+
 // Routes: /, /how-it-works, /your-letters, /write/:mode, /letter, /crisis
 export default function App() {
   const navigate = useNavigate();
@@ -647,7 +654,7 @@ export default function App() {
   };
 
   // Save letter to database (for authenticated users)
-  const saveLetter = async (letterContent, mode, toneUsed, questionsData) => {
+  const saveLetter = async (letterContent, mode, toneUsed, questionsData, retryCount = 0) => {
     if (!user) return null;
     
     setLetterSaveStatus('saving');
@@ -679,7 +686,16 @@ export default function App() {
       
       return data;
     } catch (err) {
-      console.error('Error saving letter:', err);
+      // Retry once on abort error
+      if (isAbortError(err) && retryCount < 1) {
+        console.log('Save aborted, retrying...');
+        await new Promise(r => setTimeout(r, 500));
+        return saveLetter(letterContent, mode, toneUsed, questionsData, retryCount + 1);
+      }
+      
+      if (!isAbortError(err)) {
+        console.error('Error saving letter:', err);
+      }
       setLetterSaveStatus('error');
       return null;
     }
@@ -718,7 +734,10 @@ export default function App() {
       // Update cache
       localStorage.setItem(cacheKey, JSON.stringify(data || []));
     } catch (err) {
-      console.error('Error fetching letters:', err);
+      // Silently ignore abort errors - cached data will be shown
+      if (!isAbortError(err)) {
+        console.error('Error fetching letters:', err);
+      }
     } finally {
       setLettersLoading(false);
     }

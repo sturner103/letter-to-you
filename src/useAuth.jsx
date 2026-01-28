@@ -1,5 +1,5 @@
 // src/hooks/useAuth.jsx
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
@@ -8,22 +8,50 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
+
+  // Helper to check if error is an abort error (which we can ignore)
+  const isAbortError = (error) => {
+    return error?.name === 'AbortError' || 
+           error?.message?.includes('aborted') ||
+           error?.code === 'ABORT_ERR';
+  };
 
   useEffect(() => {
+    mountedRef.current = true;
+    
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          if (!isAbortError(error)) {
+            console.error('Error getting initial session:', error);
+          }
+          if (mountedRef.current) {
+            setUser(null);
+            setLoading(false);
+          }
+          return;
+        }
+        
+        if (mountedRef.current) {
+          setUser(session?.user ?? null);
 
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+          }
+          setLoading(false);
         }
       } catch (error) {
-        console.error('Error getting initial session:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
+        if (!isAbortError(error)) {
+          console.error('Error getting initial session:', error);
+        }
+        if (mountedRef.current) {
+          setUser(null);
+          setLoading(false);
+        }
       }
     };
 
@@ -33,6 +61,9 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
+        
+        if (!mountedRef.current) return;
+        
         setUser(session?.user ?? null);
 
         if (session?.user) {
@@ -44,10 +75,15 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mountedRef.current = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId) => {
+    if (!mountedRef.current) return;
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -55,10 +91,25 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
-      setProfile(data);
+      if (error) {
+        // Profile might not exist yet - that's okay
+        if (error.code === 'PGRST116') {
+          console.log('No profile found for user, will be created on first use');
+          return;
+        }
+        if (!isAbortError(error)) {
+          console.error('Error fetching profile:', error);
+        }
+        return;
+      }
+      
+      if (mountedRef.current) {
+        setProfile(data);
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      if (!isAbortError(error)) {
+        console.error('Error fetching profile:', error);
+      }
     }
   };
 
