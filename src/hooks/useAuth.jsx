@@ -138,10 +138,21 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  };
+
   // Force clear all Supabase auth storage
   const forceSignOut = useCallback(() => {
-    console.log('Force clearing auth storage...');
-    
     // Clear all possible Supabase storage keys
     const keysToRemove = [];
     
@@ -163,7 +174,6 @@ export const AuthProvider = ({ children }) => {
     
     // Remove all found keys
     keysToRemove.forEach(({ storage, key }) => {
-      console.log(`Removing ${storage}Storage key: ${key}`);
       if (storage === 'local') {
         localStorage.removeItem(key);
       } else {
@@ -174,14 +184,10 @@ export const AuthProvider = ({ children }) => {
     // Update state immediately
     setUser(null);
     setProfile(null);
-    
-    console.log('Auth storage cleared');
   }, []);
 
   // Sign out with timeout protection
   const signOut = useCallback(async () => {
-    console.log('signOut called');
-    
     // Create a promise that rejects after timeout
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Sign out timed out')), 3000);
@@ -193,9 +199,7 @@ export const AuthProvider = ({ children }) => {
         supabase.auth.signOut(),
         timeoutPromise
       ]);
-      console.log('Supabase signOut succeeded');
     } catch (error) {
-      console.warn('Supabase signOut failed or timed out:', error.message);
       // Continue anyway - we'll force clear storage
     }
     
@@ -234,6 +238,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signInWithMagicLink,
+    signInWithGoogle,
     signOut,
     forceSignOut,
     updateProfile,
