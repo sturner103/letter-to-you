@@ -4,21 +4,15 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
 
-// Helper to check if error is an abort error (which we can ignore)
-const isAbortError = (error) => {
-  return error?.name === 'AbortError' || 
-         error?.message?.includes('aborted') ||
-         error?.code === 'ABORT_ERR';
-};
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
+  const initializedRef = useRef(false);
 
   const fetchProfile = useCallback(async (userId) => {
-    if (!mountedRef.current) return;
+    if (!mountedRef.current || !userId) return;
     
     try {
       const { data, error } = await supabase
@@ -33,9 +27,7 @@ export const AuthProvider = ({ children }) => {
           console.log('No profile found for user, will be created on first use');
           return;
         }
-        if (!isAbortError(error)) {
-          console.error('Error fetching profile:', error);
-        }
+        console.error('Error fetching profile:', error);
         return;
       }
       
@@ -43,69 +35,72 @@ export const AuthProvider = ({ children }) => {
         setProfile(data);
       }
     } catch (error) {
-      if (!isAbortError(error)) {
-        console.error('Error fetching profile:', error);
-      }
+      console.error('Error fetching profile:', error);
     }
   }, []);
 
   useEffect(() => {
     mountedRef.current = true;
     
-    // Get initial session
+    // Set up auth state listener FIRST - this is the primary source of truth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, 'hasSession:', !!session);
+        
+        if (!mountedRef.current) return;
+        
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        if (currentUser) {
+          // Use setTimeout to avoid Supabase deadlock issues
+          setTimeout(() => {
+            if (mountedRef.current) {
+              fetchProfile(currentUser.id);
+            }
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+        
+        // Mark as no longer loading once we get any auth event
+        if (!initializedRef.current) {
+          initializedRef.current = true;
+          setLoading(false);
+        }
+      }
+    );
+
+    // Also try getSession as a backup, but don't let it override the listener
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          if (!isAbortError(error)) {
-            console.error('Error getting initial session:', error);
-          }
-          if (mountedRef.current) {
-            setUser(null);
-            setLoading(false);
-          }
-          return;
+          console.log('getSession error (may be normal):', error.message);
         }
         
-        if (mountedRef.current) {
+        // Only use this result if we haven't already initialized from the listener
+        if (mountedRef.current && !initializedRef.current) {
+          console.log('Using getSession result, hasSession:', !!session);
           setUser(session?.user ?? null);
-
           if (session?.user) {
-            await fetchProfile(session.user.id);
+            fetchProfile(session.user.id);
           }
+          initializedRef.current = true;
           setLoading(false);
         }
       } catch (error) {
-        if (!isAbortError(error)) {
-          console.error('Error getting initial session:', error);
-        }
-        if (mountedRef.current) {
-          setUser(null);
+        console.log('getSession caught error (may be normal):', error.message);
+        // If getSession fails but listener hasn't fired yet, set loading false
+        if (mountedRef.current && !initializedRef.current) {
+          initializedRef.current = true;
           setLoading(false);
         }
       }
     };
 
     getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event);
-        
-        if (!mountedRef.current) return;
-        
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-        setLoading(false);
-      }
-    );
 
     return () => {
       mountedRef.current = false;
