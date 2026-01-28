@@ -703,6 +703,7 @@ export default function App() {
 
   // Fetch user's saved letters with localStorage caching
   const fetchSavedLetters = async () => {
+    console.log('fetchSavedLetters called, user:', user?.id);
     if (!user) return;
     
     setLettersLoading(true);
@@ -722,12 +723,14 @@ export default function App() {
     
     // Then fetch fresh data from database
     try {
+      console.log('Fetching letters from Supabase for user:', user.id);
       const { data, error } = await supabase
         .from('letters')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      console.log('Supabase response:', { data, error });
       if (error) throw error;
       
       setSavedLetters(data || []);
@@ -796,16 +799,21 @@ export default function App() {
 
   // Fetch letters when user logs in or when viewing Your Letters
   useEffect(() => {
+    console.log('Letters useEffect:', { path: location.pathname, authLoading, hasUser: !!user, userId: user?.id });
+    
     if (location.pathname === '/your-letters') {
       // Wait for auth to finish loading before making any decisions
       if (authLoading) {
+        console.log('Auth still loading, waiting...');
         setLettersLoading(true);
         return;
       }
       
       if (user) {
+        console.log('User found, fetching letters...');
         fetchSavedLetters();
       } else {
+        console.log('No user, clearing letters');
         setLettersLoading(false);
         setSavedLetters([]);
         // Clear cache if logged out
