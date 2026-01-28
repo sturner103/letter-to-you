@@ -45,8 +45,6 @@ export const AuthProvider = ({ children }) => {
     // Set up auth state listener FIRST - this is the primary source of truth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, 'hasSession:', !!session);
-        
         if (!mountedRef.current) return;
         
         const currentUser = session?.user ?? null;
@@ -76,13 +74,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.log('getSession error (may be normal):', error.message);
-        }
-        
         // Only use this result if we haven't already initialized from the listener
         if (mountedRef.current && !initializedRef.current) {
-          console.log('Using getSession result, hasSession:', !!session);
           setUser(session?.user ?? null);
           if (session?.user) {
             fetchProfile(session.user.id);
@@ -91,7 +84,6 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.log('getSession caught error (may be normal):', error.message);
         // If getSession fails but listener hasn't fired yet, set loading false
         if (mountedRef.current && !initializedRef.current) {
           initializedRef.current = true;
