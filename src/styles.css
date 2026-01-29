@@ -1845,6 +1845,12 @@ body {
     display: none !important;
   }
   
+  /* Hide decorative elements that clip at edges */
+  .letter::before,
+  .letter::after {
+    display: none !important;
+  }
+  
   /* Reset page */
   @page {
     size: letter;

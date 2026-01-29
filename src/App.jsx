@@ -5,6 +5,38 @@ import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
+/* ============================================================================
+   APP.JSX - MAIN APPLICATION FILE
+   ============================================================================
+   
+   FILE STRUCTURE (use Ctrl+F to jump to sections):
+   
+   [STATE]        - All useState declarations (~line 40)
+   [DATA]         - Static data: quickQuestions, toneOptions, letterTypes (~line 115)
+   [EFFECTS]      - All useEffect hooks (~line 295)
+   [HANDLERS]     - Event handlers and functions (~line 385)
+   [RENDER]       - JSX return statement (~line 1125)
+   
+   VIEWS (inside [RENDER]):
+   [VIEW:NAVBAR]       - Navigation bar
+   [VIEW:LANDING]      - Home page with letter types
+   [VIEW:HOW-IT-WORKS] - Static info page
+   [VIEW:QUICK]        - Quick letter interview (free)
+   [VIEW:INTERVIEW]    - Main paid interview
+   [VIEW:LETTER]       - Letter display with toolbar
+   [VIEW:YOUR-LETTERS] - Saved letters list
+   [VIEW:CRISIS]       - Crisis resources page
+   
+   MODALS (inside [RENDER]):
+   [MODAL:EMAIL]       - Email letter modal
+   [MODAL:ANSWERS]     - View answers modal
+   [MODAL:REWRITE]     - Rewrite tone modal
+   [MODAL:COMPARISON]  - Letter comparison modal
+   [MODAL:PAYMENT]     - Payment gate modal
+   [MODAL:AUTH]        - Authentication modal
+   
+   ============================================================================ */
+
 // Helper to check if error is an abort error (can be safely ignored)
 const isAbortError = (error) => {
   return error?.name === 'AbortError' || 
@@ -16,6 +48,10 @@ const isAbortError = (error) => {
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  /* --------------------------------------------------------------------------
+     [STATE] - All useState declarations
+     -------------------------------------------------------------------------- */
   
   // Derive current "view" from URL path
   const getViewFromPath = () => {
@@ -110,6 +146,10 @@ export default function App() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [currentPurchase, setCurrentPurchase] = useState(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
+
+  /* --------------------------------------------------------------------------
+     [DATA] - Static data constants
+     -------------------------------------------------------------------------- */
 
   // Quick Letter questions with pre-written options
   const quickQuestions = [
@@ -291,6 +331,10 @@ export default function App() {
     }
   ];
 
+  /* --------------------------------------------------------------------------
+     [EFFECTS] - All useEffect hooks
+     -------------------------------------------------------------------------- */
+
   // Load questions when mode is selected
   useEffect(() => {
     if (selectedMode) {
@@ -313,6 +357,9 @@ export default function App() {
   // PAYMENT VERIFICATION ON PAGE LOAD - NEW
   // ========================================
   useEffect(() => {
+    // Wait for auth to finish loading before checking payment
+    if (authLoading) return;
+    
     const searchParams = new URLSearchParams(location.search);
     const paymentStatus = searchParams.get('payment');
     const sessionId = searchParams.get('session_id');
@@ -322,7 +369,7 @@ export default function App() {
     } else if (paymentStatus === 'cancelled') {
       navigate(location.pathname, { replace: true });
     }
-  }, [location.search, user]);
+  }, [location.search, user, authLoading]);
 
   // Verify payment when returning from Stripe
   const verifyPaymentReturn = async (sessionId) => {
@@ -368,6 +415,10 @@ export default function App() {
       textareaRef.current.focus();
     }
   }, [currentIndex, view]);
+
+  /* --------------------------------------------------------------------------
+     [HANDLERS] - Event handlers and functions
+     -------------------------------------------------------------------------- */
 
   // Check all answers for safety content
   const hasSafetyContent = () => {
@@ -1021,6 +1072,8 @@ export default function App() {
         return letters.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       case 'mode':
         return letters.sort((a, b) => (a.mode || '').localeCompare(b.mode || ''));
+      case 'tone':
+        return letters.sort((a, b) => (a.tone || '').localeCompare(b.tone || ''));
       case 'newest':
       default:
         return letters.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -1119,9 +1172,13 @@ export default function App() {
     "I need to think about this more"
   ];
 
+  /* --------------------------------------------------------------------------
+     [RENDER] - JSX return statement
+     -------------------------------------------------------------------------- */
+
   return (
     <div className="app">
-      {/* Navbar */}
+      {/* [VIEW:NAVBAR] ---------------------------------------------------- */}
       <nav className="navbar">
         <div className="navbar-inner">
           <button className="nav-brand" onClick={() => navigate('/')}>
@@ -1159,7 +1216,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Landing - Now includes mode selection */}
+      {/* [VIEW:LANDING] --------------------------------------------------- */}
       {view === 'landing' && (
         <div className="view landing">
           <div className="landing-hero">
@@ -1247,8 +1304,6 @@ export default function App() {
                   <li>Therapy or professional mental health support</li>
                   <li>A diagnosis or treatment recommendation</li>
                   <li>A replacement for talking to a real person</li>
-                  <li>Advice about what you should do</li>
-                  <li>Something for moments of crisis</li>
                 </ul>
               </div>
             </div>
@@ -1305,7 +1360,7 @@ export default function App() {
         </div>
       )}
 
-      {/* How It Works */}
+      {/* [VIEW:HOW-IT-WORKS] ----------------------------------------------- */}
       {view === 'how-it-works' && (
         <div className="view static-page">
           <div className="static-content">
@@ -1364,7 +1419,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Quick Interview - FREE */}
+      {/* [VIEW:QUICK] - Quick Letter Interview (Free) ---------------------- */}
       {view === 'quick-interview' && (
         <div className="view quick-interview">
           <div className="quick-interview-container">
@@ -1438,7 +1493,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Interview - PAID (requires verified purchase) */}
+      {/* [VIEW:INTERVIEW] - Main Paid Interview ----------------------------- */}
       {view === 'interview' && currentQuestion && (
         <div className="view interview">
           <div className="interview-layout">
@@ -1593,50 +1648,35 @@ export default function App() {
         </div>
       )}
 
-      {/* Letter */}
+      {/* [VIEW:LETTER] - Letter Display with Toolbar ------------------------ */}
       {view === 'letter' && (
         <div className="view letter-view">
           <div className="letter-container">
             <div className="letter-toolbar">
-              <div className="toolbar-group toolbar-left">
-                <span className="toolbar-label">Reflect</span>
-                <button className="toolbar-btn" onClick={() => setShowAnswersModal(true)}>
-                  <span className="toolbar-icon">📝</span>
-                  <span className="toolbar-text">My Answers</span>
-                </button>
-                <button className="toolbar-btn" onClick={() => setShowRewriteModal(true)}>
-                  <span className="toolbar-icon">✏️</span>
-                  <span className="toolbar-text">Rewrite</span>
-                </button>
-                <button className="toolbar-btn" onClick={scrollToModes}>
-                  <span className="toolbar-icon">✦</span>
-                  <span className="toolbar-text">Write Another</span>
-                </button>
-              </div>
-              
-              <div className="toolbar-group toolbar-right">
-                <span className="toolbar-label">Save & Share</span>
-                <button className="toolbar-btn" onClick={() => setShowEmailModal(true)}>
-                  <span className="toolbar-icon">✉️</span>
-                  <span className="toolbar-text">Email</span>
-                </button>
-                <button className="toolbar-btn" onClick={shareLetter}>
-                  <span className="toolbar-icon">{shareCopied ? '✓' : '🔗'}</span>
-                  <span className="toolbar-text">{shareCopied ? 'Copied!' : 'Share'}</span>
-                </button>
-                <button className="toolbar-btn" onClick={copyLetter}>
-                  <span className="toolbar-icon">📋</span>
-                  <span className="toolbar-text">Copy</span>
-                </button>
-                <button className="toolbar-btn" onClick={printLetter}>
-                  <span className="toolbar-icon">🖨️</span>
-                  <span className="toolbar-text">Print</span>
-                </button>
-                <button className="toolbar-btn toolbar-btn-primary" onClick={saveToPdf}>
-                  <span className="toolbar-icon">⬇️</span>
-                  <span className="toolbar-text">PDF</span>
-                </button>
-              </div>
+              <button className="toolbar-btn" onClick={() => setShowRewriteModal(true)}>
+                <span className="toolbar-icon">✏️</span>
+                <span className="toolbar-text">Change Tone</span>
+              </button>
+              <button className="toolbar-btn" onClick={() => setShowEmailModal(true)}>
+                <span className="toolbar-icon">✉️</span>
+                <span className="toolbar-text">Email</span>
+              </button>
+              <button className="toolbar-btn" onClick={shareLetter}>
+                <span className="toolbar-icon">{shareCopied ? '✓' : '🔗'}</span>
+                <span className="toolbar-text">{shareCopied ? 'Copied!' : 'Share'}</span>
+              </button>
+              <button className="toolbar-btn" onClick={copyLetter}>
+                <span className="toolbar-icon">📋</span>
+                <span className="toolbar-text">Copy</span>
+              </button>
+              <button className="toolbar-btn" onClick={printLetter}>
+                <span className="toolbar-icon">🖨️</span>
+                <span className="toolbar-text">Print</span>
+              </button>
+              <button className="toolbar-btn toolbar-btn-primary" onClick={saveToPdf}>
+                <span className="toolbar-icon">⬇️</span>
+                <span className="toolbar-text">PDF</span>
+              </button>
             </div>
 
             <article className="letter">
@@ -1676,7 +1716,7 @@ export default function App() {
               </p>
             )}
 
-            {!user && (
+            {!user && !authLoading && (
               <div className="save-prompt">
                 <p>Want to save this letter and access it later?</p>
                 <button className="btn secondary" onClick={() => setShowAuthModal(true)}>
@@ -1688,7 +1728,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Your Letters */}
+      {/* [VIEW:YOUR-LETTERS] - Saved Letters List --------------------------- */}
       {view === 'your-letters' && (
         <div className="view your-letters-view">
           <div className="your-letters-container">
@@ -1717,30 +1757,31 @@ export default function App() {
             ) : (
               <>
                 <div className="letters-controls-row">
-                  <div className="letters-controls-left">
-                    <span className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</span>
-                    <button 
-                      className={`compare-mode-btn ${getCompareButtonState()}`}
-                      onClick={() => {
-                        if (getCompareButtonState() === 'ready') {
-                          compareLetters();
-                        } else if (getCompareButtonState() === 'inactive') {
-                          setCompareMode(true);
-                        }
-                      }}
-                    >
-                      Compare Letters
-                    </button>
-                  </div>
-                  <select 
-                    className="letters-sort-select"
-                    value={letterSort}
-                    onChange={(e) => setLetterSort(e.target.value)}
+                  <button 
+                    className={`compare-mode-btn ${getCompareButtonState()}`}
+                    onClick={() => {
+                      if (getCompareButtonState() === 'ready') {
+                        compareLetters();
+                      } else if (getCompareButtonState() === 'inactive') {
+                        setCompareMode(true);
+                      }
+                    }}
                   >
-                    <option value="newest">Newest first</option>
-                    <option value="oldest">Oldest first</option>
-                    <option value="mode">By type</option>
-                  </select>
+                    Compare Letters
+                  </button>
+                  <div className="letters-controls-right">
+                    <span className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</span>
+                    <select 
+                      className="letters-sort-select"
+                      value={letterSort}
+                      onChange={(e) => setLetterSort(e.target.value)}
+                    >
+                      <option value="newest">Newest first</option>
+                      <option value="oldest">Oldest first</option>
+                      <option value="mode">By type</option>
+                      <option value="tone">By tone</option>
+                    </select>
+                  </div>
                 </div>
 
                 {compareMode && (

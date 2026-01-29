@@ -1225,6 +1225,12 @@
   gap: 16px;
 }
 
+.letters-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .letters-count {
   font-size: 0.9rem;
   color: #8a847d;
@@ -1438,13 +1444,13 @@
     gap: 12px;
   }
   
-  .letters-controls-left {
+  .letters-controls-right {
     width: 100%;
     justify-content: space-between;
   }
   
   .letters-sort-select {
-    width: 100%;
+    flex: 1;
   }
   
   .letter-card-tone {
@@ -1775,15 +1781,16 @@
 
 .letter-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   padding: 16px 20px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-bottom: 24px;
   border: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
 .toolbar-group {
