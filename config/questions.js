@@ -11,12 +11,12 @@ export const modes = [
 
 // Life Event Templates - specific situations
 export const lifeEventModes = [
-  { id: 'breakup', name: 'After a Breakup', icon: '💔', description: 'Processing the end of a relationship' },
-  { id: 'newbeginning', name: 'New Beginning', icon: '🌱', description: 'Starting a new job, city, or chapter' },
-  { id: 'grief', name: 'Processing Grief', icon: '🕊', description: 'Honoring loss and finding your way forward' },
-  { id: 'newparent', name: 'New Parent', icon: '👶', description: 'Navigating the identity shift of parenthood' },
-  { id: 'careercrossroads', name: 'Career Crossroads', icon: '🔄', description: 'Figuring out your next professional move' },
-  { id: 'milestone', name: 'Milestone Birthday', icon: '🎂', description: 'Reflecting on a new decade of life' }
+  { id: 'breakup', name: 'After a Breakup', icon: '◇', description: 'Processing the end of a relationship' },
+  { id: 'newbeginning', name: 'New Beginning', icon: '↗', description: 'Starting a new job, city, or chapter' },
+  { id: 'grief', name: 'Processing Grief', icon: '○', description: 'Honoring loss and finding your way forward' },
+  { id: 'newparent', name: 'New Parent', icon: '✧', description: 'Navigating the identity shift of parenthood' },
+  { id: 'careercrossroads', name: 'Career Crossroads', icon: '⊗', description: 'Figuring out your next professional move' },
+  { id: 'milestone', name: 'Milestone Birthday', icon: '◐', description: 'Reflecting on a new decade of life' }
 ];
 
 // Life Event specific questions

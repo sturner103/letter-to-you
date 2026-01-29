@@ -1164,14 +1164,6 @@ export default function App() {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
 
-  // Skip/quick response options for regular interview
-  const skipOptions = [
-    "I'm not sure yet",
-    "I'd rather not say",
-    "This doesn't apply to me",
-    "I need to think about this more"
-  ];
-
   /* --------------------------------------------------------------------------
      [RENDER] - JSX return statement
      -------------------------------------------------------------------------- */
@@ -1270,20 +1262,6 @@ export default function App() {
             </div>
           </section>
 
-          {/* Quick Letter Option - FREE */}
-          <section className="landing-section">
-            <div className="quick-letter-hero">
-              <button className="quick-letter-card-large" onClick={startQuickLetter}>
-                <span className="quick-letter-badge">⚡ Free • 2 minutes</span>
-                <span className="quick-letter-name">Short on time?</span>
-                <span className="quick-letter-desc">
-                  Try the Quick Letter — 5 questions with pre-written options.
-                </span>
-                <span className="quick-letter-cta">Start quick reflection →</span>
-              </button>
-            </div>
-          </section>
-
           {/* What It Is / Isn't Section */}
           <section className="landing-section">
             <h2 className="section-title">What this is (and isn't)</h2>
@@ -1294,7 +1272,7 @@ export default function App() {
                   <li>A structured way to think through what you're feeling</li>
                   <li>Questions designed to surface what's under the surface</li>
                   <li>A letter that reflects your own words back to you</li>
-                  <li>Private — nothing is stored or shared</li>
+                  <li>Private — your letters are stored securely and visible only to you</li>
                   <li>Something you can return to over time</li>
                 </ul>
               </div>
@@ -1394,19 +1372,19 @@ export default function App() {
 
             <div className="info-cards">
               <div className="info-card">
-                <div className="info-card-icon">🔒</div>
-                <h3>Privacy first</h3>
-                <p>Nothing stored. Nothing tracked. Your words stay yours — once you close the page, it's gone.</p>
+                <div className="info-card-icon">◐</div>
+                <h3>Private by design</h3>
+                <p>Your letters are stored securely in your account and visible only to you. We don't share, sell, or train on your data.</p>
               </div>
 
               <div className="info-card">
-                <div className="info-card-icon">💭</div>
+                <div className="info-card-icon">◇</div>
                 <h3>Real questions</h3>
                 <p>Not therapy. Not a quiz. Just thoughtful prompts designed to help you think out loud.</p>
               </div>
 
               <div className="info-card">
-                <div className="info-card-icon">✉️</div>
+                <div className="info-card-icon">⊙</div>
                 <h3>A mirror, not advice</h3>
                 <p>Your letter reflects your words back — helping you see patterns and name what you're feeling.</p>
               </div>
@@ -1550,21 +1528,6 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="quick-answers">
-                  <span className="quick-label">Quick response:</span>
-                  <div className="quick-options">
-                    {skipOptions.map((answer, i) => (
-                      <button
-                        key={i}
-                        className={`quick-btn ${answers[currentQuestion.id] === answer ? 'selected' : ''}`}
-                        onClick={() => selectQuickAnswer(currentQuestion.id, answer)}
-                      >
-                        {answer}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {currentQuestion.followUp && (
                   <div className="followup-section">
                     <button
@@ -1654,27 +1617,27 @@ export default function App() {
           <div className="letter-container">
             <div className="letter-toolbar">
               <button className="toolbar-btn" onClick={() => setShowRewriteModal(true)}>
-                <span className="toolbar-icon">✏️</span>
+                <span className="toolbar-icon">◇</span>
                 <span className="toolbar-text">Change Tone</span>
               </button>
               <button className="toolbar-btn" onClick={() => setShowEmailModal(true)}>
-                <span className="toolbar-icon">✉️</span>
+                <span className="toolbar-icon">▷</span>
                 <span className="toolbar-text">Email</span>
               </button>
               <button className="toolbar-btn" onClick={shareLetter}>
-                <span className="toolbar-icon">{shareCopied ? '✓' : '🔗'}</span>
+                <span className="toolbar-icon">{shareCopied ? '✓' : '◎'}</span>
                 <span className="toolbar-text">{shareCopied ? 'Copied!' : 'Share'}</span>
               </button>
               <button className="toolbar-btn" onClick={copyLetter}>
-                <span className="toolbar-icon">📋</span>
+                <span className="toolbar-icon">⊡</span>
                 <span className="toolbar-text">Copy</span>
               </button>
               <button className="toolbar-btn" onClick={printLetter}>
-                <span className="toolbar-icon">🖨️</span>
+                <span className="toolbar-icon">⊞</span>
                 <span className="toolbar-text">Print</span>
               </button>
               <button className="toolbar-btn toolbar-btn-primary" onClick={saveToPdf}>
-                <span className="toolbar-icon">⬇️</span>
+                <span className="toolbar-icon">↓</span>
                 <span className="toolbar-text">PDF</span>
               </button>
             </div>
@@ -1703,8 +1666,12 @@ export default function App() {
                 <p className="closing-me">me</p>
               </div>
 
+              <div className="letter-disclaimer">
+                <p>This letter is a self-reflection tool — not therapy, professional advice, or a substitute for talking to a real person.</p>
+              </div>
+
               <div className="print-footer">
-                <p>lettertoyou.app · A tool for self-reflection</p>
+                <p>barryletter.com · A tool for self-reflection</p>
               </div>
             </article>
 
@@ -1767,7 +1734,7 @@ export default function App() {
                       }
                     }}
                   >
-                    Compare Letters
+                    Compare Letters <span className="beta-badge">Beta</span>
                   </button>
                   <div className="letters-controls-right">
                     <span className="letters-count">{savedLetters.length} letter{savedLetters.length !== 1 ? 's' : ''}</span>
