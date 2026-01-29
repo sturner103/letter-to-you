@@ -2361,9 +2361,10 @@ body {
 }
 
 .life-event-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent);
   margin-bottom: 0.25rem;
 }
 
@@ -2397,7 +2398,7 @@ body {
   }
   
   .life-event-name {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   
   .life-event-desc {

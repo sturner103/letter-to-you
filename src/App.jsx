@@ -146,6 +146,9 @@ export default function App() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [currentPurchase, setCurrentPurchase] = useState(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  
+  // Track if we're returning from Stripe (session_id in URL means user was definitely logged in)
+  const isReturningFromPayment = new URLSearchParams(location.search).has('session_id');
 
   /* --------------------------------------------------------------------------
      [DATA] - Static data constants
@@ -357,17 +360,42 @@ export default function App() {
   // PAYMENT VERIFICATION ON PAGE LOAD - NEW
   // ========================================
   useEffect(() => {
-    // Wait for auth to finish loading before checking payment
-    if (authLoading) return;
-    
     const searchParams = new URLSearchParams(location.search);
     const paymentStatus = searchParams.get('payment');
     const sessionId = searchParams.get('session_id');
 
-    if (paymentStatus === 'success' && sessionId && user) {
-      verifyPaymentReturn(sessionId);
-    } else if (paymentStatus === 'cancelled') {
+    // If not a payment return, nothing to do
+    if (!paymentStatus || !sessionId) return;
+    
+    // Handle cancelled payment immediately
+    if (paymentStatus === 'cancelled') {
       navigate(location.pathname, { replace: true });
+      return;
+    }
+
+    // For successful payment, wait for auth to be fully ready
+    if (paymentStatus === 'success') {
+      // Still loading auth - wait
+      if (authLoading) return;
+      
+      // Auth loaded and user available - verify payment
+      if (user) {
+        verifyPaymentReturn(sessionId);
+        return;
+      }
+      
+      // Auth loaded but no user yet - give it a moment longer
+      // This handles the race condition where authLoading becomes false before user is set
+      const retryTimeout = setTimeout(() => {
+        if (user) {
+          verifyPaymentReturn(sessionId);
+        } else {
+          console.log('User not authenticated after payment return, may need to sign in again');
+          navigate('/', { replace: true });
+        }
+      }, 2000);
+      
+      return () => clearTimeout(retryTimeout);
     }
   }, [location.search, user, authLoading]);
 
@@ -1683,7 +1711,7 @@ export default function App() {
               </p>
             )}
 
-            {!user && !authLoading && (
+            {!user && !authLoading && !isReturningFromPayment && (
               <div className="save-prompt">
                 <p>Want to save this letter and access it later?</p>
                 <button className="btn secondary" onClick={() => setShowAuthModal(true)}>
