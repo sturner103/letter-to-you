@@ -375,27 +375,22 @@ export default function App() {
 
     // For successful payment, wait for auth to be fully ready
     if (paymentStatus === 'success') {
-      // Still loading auth - wait
-      if (authLoading) return;
+      // Still loading auth - wait for it
+      if (authLoading) {
+        console.log('Payment return: waiting for auth to load...');
+        return;
+      }
       
       // Auth loaded and user available - verify payment
       if (user) {
+        console.log('Payment return: user authenticated, verifying payment...');
         verifyPaymentReturn(sessionId);
         return;
       }
       
-      // Auth loaded but no user yet - give it a moment longer
-      // This handles the race condition where authLoading becomes false before user is set
-      const retryTimeout = setTimeout(() => {
-        if (user) {
-          verifyPaymentReturn(sessionId);
-        } else {
-          console.log('User not authenticated after payment return, may need to sign in again');
-          navigate('/', { replace: true });
-        }
-      }, 2000);
-      
-      return () => clearTimeout(retryTimeout);
+      // Auth loaded but no user - this shouldn't happen after Stripe redirect
+      // Don't redirect immediately - the auth state might still be settling
+      console.log('Payment return: auth loaded but no user yet, waiting...');
     }
   }, [location.search, user, authLoading]);
 
@@ -424,18 +419,17 @@ export default function App() {
   };
 
   // Protect interview route - redirect if not paid
+  // But DON'T redirect if we're in the middle of payment verification
   useEffect(() => {
+    // Skip this check entirely if returning from payment
+    if (isReturningFromPayment) return;
+    
     if (view === 'interview' && urlMode && urlMode !== 'quick' && user && !paymentVerified && !paymentLoading) {
-      const searchParams = new URLSearchParams(location.search);
-      const hasSessionId = searchParams.has('session_id');
-      
-      if (!hasSessionId) {
-        setPaymentMode(urlMode);
-        setShowPaymentGate(true);
-        navigate('/', { replace: true });
-      }
+      setPaymentMode(urlMode);
+      setShowPaymentGate(true);
+      navigate('/', { replace: true });
     }
-  }, [view, urlMode, user, paymentVerified, paymentLoading]);
+  }, [view, urlMode, user, paymentVerified, paymentLoading, isReturningFromPayment]);
 
   // Auto-focus textarea when question changes
   useEffect(() => {
