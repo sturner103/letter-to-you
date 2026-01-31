@@ -596,6 +596,11 @@ export default function App() {
   // MODIFIED: Generate the letter - now marks purchase as used
   // ========================================
   const generateLetter = async () => {
+    // Capture user info BEFORE any async operations
+    // This prevents issues if auth state changes during generation
+    const currentUserId = user?.id;
+    const currentPurchaseId = currentPurchase?.id;
+    
     setIsGenerating(true);
     setError(null);
     setLetterSaveStatus(null);
@@ -659,19 +664,20 @@ export default function App() {
       window.scrollTo(0, 0);
 
       // Auto-save letter for authenticated users
-      if (user) {
-        const savedLetter = await saveLetter(data.letter, selectedMode, tone, questionsData);
+      // Use the captured user ID from before the async call
+      if (currentUserId) {
+        const savedLetter = await saveLetterWithUserId(data.letter, selectedMode, tone, questionsData, currentUserId);
         
         // Mark the purchase as used
-        if (currentPurchase?.id) {
+        if (currentPurchaseId) {
           try {
             await fetch('/.netlify/functions/mark-purchase-used', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                purchaseId: currentPurchase.id,
+                purchaseId: currentPurchaseId,
                 letterId: savedLetter?.id,
-                userId: user.id
+                userId: currentUserId
               })
             });
             // Reset purchase state
@@ -950,6 +956,52 @@ export default function App() {
         console.log('Save aborted, retrying...');
         await new Promise(r => setTimeout(r, 500));
         return saveLetter(letterContent, mode, toneUsed, questionsData, retryCount + 1);
+      }
+      
+      if (!isAbortError(err)) {
+        console.error('Error saving letter:', err);
+      }
+      setLetterSaveStatus('error');
+      return null;
+    }
+  };
+
+  // Save letter with explicit userId (for when user state might change during async ops)
+  const saveLetterWithUserId = async (letterContent, mode, toneUsed, questionsData, userId, retryCount = 0) => {
+    if (!userId) return null;
+    
+    setLetterSaveStatus('saving');
+    
+    try {
+      const { data, error } = await supabase
+        .from('letters')
+        .insert({
+          user_id: userId,
+          mode: mode,
+          tone: toneUsed,
+          questions: questionsData,
+          letter_content: letterContent,
+          word_count: letterContent.split(/\s+/).length,
+          delivery_status: 'immediate'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setLetterSaveStatus('saved');
+      
+      const cacheKey = `letters_${userId}`;
+      const cached = localStorage.getItem(cacheKey);
+      const cachedLetters = cached ? JSON.parse(cached) : [];
+      localStorage.setItem(cacheKey, JSON.stringify([data, ...cachedLetters]));
+      
+      return data;
+    } catch (err) {
+      if (isAbortError(err) && retryCount < 1) {
+        console.log('Save aborted, retrying...');
+        await new Promise(r => setTimeout(r, 500));
+        return saveLetterWithUserId(letterContent, mode, toneUsed, questionsData, userId, retryCount + 1);
       }
       
       if (!isAbortError(err)) {
