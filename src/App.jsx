@@ -1697,7 +1697,7 @@ export default function App() {
               </div>
             </article>
 
-            {user && letterSaveStatus && (
+            {letterSaveStatus && (
               <p className={`letter-save-status ${letterSaveStatus}`}>
                 {letterSaveStatus === 'saving' && '💾 Saving to your account...'}
                 {letterSaveStatus === 'saved' && '✓ Saved to your account'}
@@ -1705,7 +1705,7 @@ export default function App() {
               </p>
             )}
 
-            {!user && !authLoading && !isReturningFromPayment && (
+            {!user && !authLoading && !isReturningFromPayment && !letterSaveStatus && (
               <div className="save-prompt">
                 <p>Want to save this letter and access it later?</p>
                 <button className="btn secondary" onClick={() => setShowAuthModal(true)}>
