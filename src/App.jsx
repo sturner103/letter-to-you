@@ -974,39 +974,41 @@ export default function App() {
   };
 
   // Save letter with explicit userId (for when user state might change during async ops)
+  // Uses backend API when frontend auth is lost (bypasses RLS)
   const saveLetterWithUserId = async (letterContent, mode, toneUsed, questionsData, userId, retryCount = 0) => {
     console.log('saveLetterWithUserId called with userId:', userId);
-    if (!userId) return null;
+    if (!userId) {
+      console.log('No userId provided, cannot save');
+      return null;
+    }
     
     setLetterSaveStatus('saving');
-    console.log('letterSaveStatus set to: saving');
     
     try {
-      const { data, error } = await supabase
-        .from('letters')
-        .insert({
-          user_id: userId,
+      // Try to save via backend API (works even without frontend auth session)
+      console.log('Saving letter via backend API...');
+      const response = await fetch('/.netlify/functions/save-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId,
           mode: mode,
           tone: toneUsed,
           questions: questionsData,
-          letter_content: letterContent,
-          word_count: letterContent.split(/\s+/).length,
-          delivery_status: 'immediate'
+          letterContent: letterContent
         })
-        .select()
-        .single();
-
-      if (error) throw error;
+      });
       
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save letter');
+      }
+      
+      console.log('Letter saved successfully via backend');
       setLetterSaveStatus('saved');
-      console.log('letterSaveStatus set to: saved');
+      return result.letter;
       
-      const cacheKey = `letters_${userId}`;
-      const cached = localStorage.getItem(cacheKey);
-      const cachedLetters = cached ? JSON.parse(cached) : [];
-      localStorage.setItem(cacheKey, JSON.stringify([data, ...cachedLetters]));
-      
-      return data;
     } catch (err) {
       if (isAbortError(err) && retryCount < 1) {
         console.log('Save aborted, retrying...');
@@ -1014,9 +1016,7 @@ export default function App() {
         return saveLetterWithUserId(letterContent, mode, toneUsed, questionsData, userId, retryCount + 1);
       }
       
-      if (!isAbortError(err)) {
-        console.error('Error saving letter:', err);
-      }
+      console.error('Error saving letter:', err);
       setLetterSaveStatus('error');
       return null;
     }
