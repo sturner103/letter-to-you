@@ -596,10 +596,10 @@ export default function App() {
   // MODIFIED: Generate the letter - now marks purchase as used
   // ========================================
   const generateLetter = async () => {
-    // Capture user info BEFORE any async operations
-    // This prevents issues if auth state changes during generation
-    const currentUserId = user?.id;
+    // Capture purchase ID before any async operations (this won't change like auth might)
     const currentPurchaseId = currentPurchase?.id;
+    
+    console.log('generateLetter started - React state user:', user?.id);
     
     setIsGenerating(true);
     setError(null);
@@ -659,13 +659,23 @@ export default function App() {
       setLetter(data.letter);
       setHasLetter(true);
       setIsGenerating(false);
-      navigate('/letter');
       
+      // Get fresh user from Supabase to avoid stale React state
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUserId = session?.user?.id;
+      console.log('After generation - session user:', currentUserId, 'React state user:', user?.id);
+      
+      // Set save status BEFORE navigating so the sign-in prompt never shows
+      if (currentUserId) {
+        setLetterSaveStatus('saving');
+      }
+      
+      navigate('/letter');
       window.scrollTo(0, 0);
 
       // Auto-save letter for authenticated users
-      // Use the captured user ID from before the async call
       if (currentUserId) {
+        console.log('Saving letter for user:', currentUserId);
         const savedLetter = await saveLetterWithUserId(data.letter, selectedMode, tone, questionsData, currentUserId);
         
         // Mark the purchase as used
@@ -688,6 +698,8 @@ export default function App() {
             // Don't block the user - letter was generated successfully
           }
         }
+      } else {
+        console.log('No authenticated user found - letter will not be saved');
       }
     } catch (err) {
       console.error('Generation error:', err);
@@ -739,7 +751,7 @@ export default function App() {
 
       setLetter(data.letter);
       setHasLetter(true);
-      setIsQuickMode(false);
+      // Keep isQuickMode true so sign-in prompt shows for unauthenticated users
       setIsGenerating(false);
       navigate('/letter');
       
@@ -968,9 +980,11 @@ export default function App() {
 
   // Save letter with explicit userId (for when user state might change during async ops)
   const saveLetterWithUserId = async (letterContent, mode, toneUsed, questionsData, userId, retryCount = 0) => {
+    console.log('saveLetterWithUserId called with userId:', userId);
     if (!userId) return null;
     
     setLetterSaveStatus('saving');
+    console.log('letterSaveStatus set to: saving');
     
     try {
       const { data, error } = await supabase
@@ -990,6 +1004,7 @@ export default function App() {
       if (error) throw error;
       
       setLetterSaveStatus('saved');
+      console.log('letterSaveStatus set to: saved');
       
       const cacheKey = `letters_${userId}`;
       const cached = localStorage.getItem(cacheKey);
@@ -1757,7 +1772,7 @@ export default function App() {
               </p>
             )}
 
-            {!user && !authLoading && !isReturningFromPayment && !letterSaveStatus && (
+            {!user && !authLoading && !isReturningFromPayment && !letterSaveStatus && isQuickMode && (
               <div className="save-prompt">
                 <p>Want to save this letter and access it later?</p>
                 <button className="btn secondary" onClick={() => setShowAuthModal(true)}>
