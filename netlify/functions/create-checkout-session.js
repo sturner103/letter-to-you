@@ -41,8 +41,14 @@ export async function handler(event) {
     }
 
     // Get the site URL for redirects
-    // In production this will be barryletter.com, locally it's localhost
-    const siteUrl = process.env.URL || 'http://localhost:5173';
+    // IMPORTANT: Hard-code production URL to ensure Stripe always redirects to the same origin
+    // This prevents session loss from www vs non-www or other URL variations
+    const siteUrl = process.env.NODE_ENV === 'production' || process.env.URL?.includes('barryletter')
+      ? 'https://barryletter.com'
+      : (process.env.URL || 'http://localhost:5173');
+    
+    console.log('Stripe redirect URL will be:', siteUrl);
+    console.log('process.env.URL:', process.env.URL);
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

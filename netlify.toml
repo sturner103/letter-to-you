@@ -13,6 +13,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Force www to non-www redirect (keeps auth session consistent)
+[[redirects]]
+  from = "https://www.barryletter.com/*"
+  to = "https://barryletter.com/:splat"
+  status = 301
+  force = true
+
 # Redirects for SPA routing
 [[redirects]]
   from = "/api/*"
