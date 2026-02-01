@@ -146,6 +146,7 @@ export default function App() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [currentPurchase, setCurrentPurchase] = useState(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  const [verifiedUserId, setVerifiedUserId] = useState(null); // UserId from Stripe session when auth is lost
   
   // Track if we're returning from Stripe (session_id in URL means user was definitely logged in)
   const isReturningFromPayment = new URLSearchParams(location.search).has('session_id');
@@ -373,37 +374,31 @@ export default function App() {
       return;
     }
 
-    // For successful payment, wait for auth to be fully ready
-    if (paymentStatus === 'success') {
-      // Still loading auth - wait for it
-      if (authLoading) {
-        console.log('Payment return: waiting for auth to load...');
-        return;
-      }
-      
-      // Auth loaded and user available - verify payment
-      if (user) {
-        console.log('Payment return: user authenticated, verifying payment...');
-        verifyPaymentReturn(sessionId);
-        return;
-      }
-      
-      // Auth loaded but no user - this shouldn't happen after Stripe redirect
-      // Don't redirect immediately - the auth state might still be settling
-      console.log('Payment return: auth loaded but no user yet, waiting...');
+    // For successful payment, verify immediately - don't wait for auth
+    // We'll get the userId from Stripe session metadata
+    if (paymentStatus === 'success' && !paymentVerified && !paymentLoading) {
+      console.log('Payment return: verifying with session_id (auth not required)...');
+      verifyPaymentReturn(sessionId);
     }
-  }, [location.search, user, authLoading]);
+  }, [location.search, paymentVerified, paymentLoading]);
 
   // Verify payment when returning from Stripe
+  // Note: Does NOT require user to be logged in - gets userId from Stripe session
   const verifyPaymentReturn = async (sessionId) => {
     setPaymentLoading(true);
     try {
-      const response = await fetch(`/.netlify/functions/verify-purchase?userId=${user.id}&sessionId=${sessionId}`);
+      // Don't pass userId - the backend will get it from Stripe session metadata
+      const response = await fetch(`/.netlify/functions/verify-purchase?sessionId=${sessionId}`);
       const data = await response.json();
 
       if (data.valid) {
         setCurrentPurchase(data.purchase);
         setPaymentVerified(true);
+        // Store the userId from Stripe session - we'll use this if auth is lost
+        if (data.userId) {
+          setVerifiedUserId(data.userId);
+          console.log('Stored verified userId from Stripe:', data.userId);
+        }
         navigate(location.pathname, { replace: true });
         console.log('Payment verified, questions unlocked');
       } else {
@@ -660,10 +655,10 @@ export default function App() {
       setHasLetter(true);
       setIsGenerating(false);
       
-      // Get fresh user from Supabase to avoid stale React state
+      // Get user ID - try Supabase session first, then fall back to verifiedUserId from Stripe
       const { data: { session } } = await supabase.auth.getSession();
-      const currentUserId = session?.user?.id;
-      console.log('After generation - session user:', currentUserId, 'React state user:', user?.id);
+      const currentUserId = session?.user?.id || verifiedUserId;
+      console.log('After generation - session user:', session?.user?.id, 'verifiedUserId:', verifiedUserId, 'using:', currentUserId);
       
       // Set save status BEFORE navigating so the sign-in prompt never shows
       if (currentUserId) {

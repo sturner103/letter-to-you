@@ -2,6 +2,7 @@
 // Verifies if a user has a valid purchase for a letter mode
 
 import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
 
 export async function handler(event) {
   // Allow GET and POST
@@ -38,6 +39,30 @@ export async function handler(event) {
       const body = JSON.parse(event.body || '{}');
       userId = body.userId;
       sessionId = body.sessionId;
+    }
+
+    // If we have a sessionId but no userId, get userId from Stripe session metadata
+    if (sessionId && !userId) {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: 'Payment system not configured' })
+        };
+      }
+      
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      
+      try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        userId = session.metadata?.userId;
+        console.log('Retrieved userId from Stripe session:', userId);
+      } catch (stripeError) {
+        console.error('Error retrieving Stripe session:', stripeError);
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'Invalid session ID' })
+        };
+      }
     }
 
     if (!userId) {
@@ -79,7 +104,9 @@ export async function handler(event) {
             letterMode: data.letter_mode,
             modeName: data.mode_name,
             createdAt: data.created_at
-          }
+          },
+          // Return userId so frontend can use it even if auth is lost
+          userId: userId
         })
       };
     }
@@ -110,7 +137,8 @@ export async function handler(event) {
           letterMode: p.letter_mode,
           modeName: p.mode_name,
           createdAt: p.created_at
-        }))
+        })),
+        userId: userId
       })
     };
 
