@@ -383,12 +383,14 @@ export default function App() {
   }, [location.search, paymentVerified, paymentLoading]);
 
   // Verify payment when returning from Stripe
-  // Note: Does NOT require user to be logged in - gets userId from Stripe session
+  // Note: Does NOT require user to be logged in - gets userId from Stripe session or cookie
   const verifyPaymentReturn = async (sessionId) => {
     setPaymentLoading(true);
     try {
-      // Don't pass userId - the backend will get it from Stripe session metadata
-      const response = await fetch(`/.netlify/functions/verify-purchase?sessionId=${sessionId}`);
+      // Don't pass userId - the backend will get it from Stripe session metadata or cookie
+      const response = await fetch(`/.netlify/functions/verify-purchase?sessionId=${sessionId}`, {
+        credentials: 'include'  // Include cookie with userId
+      });
       const data = await response.json();
 
       if (data.valid) {
@@ -486,6 +488,15 @@ export default function App() {
       const modeInfo = letterTypes.find(t => t.id === paymentMode) ||
                        lifeEventModes.find(m => m.id === paymentMode);
       const modeName = modeInfo?.name || paymentMode;
+
+      // Set a cookie with userId BEFORE going to Stripe
+      // This survives the redirect even if localStorage is wiped
+      await fetch('/.netlify/functions/set-checkout-cookie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userId: user.id })
+      });
 
       const response = await fetch('/.netlify/functions/create-checkout-session', {
         method: 'POST',
@@ -679,6 +690,7 @@ export default function App() {
             await fetch('/.netlify/functions/mark-purchase-used', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify({
                 purchaseId: currentPurchaseId,
                 letterId: savedLetter?.id,
@@ -990,6 +1002,7 @@ export default function App() {
       const response = await fetch('/.netlify/functions/save-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',  // Include cookie with userId as backup
         body: JSON.stringify({
           userId: userId,
           mode: mode,

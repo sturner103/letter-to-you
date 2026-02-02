@@ -28,6 +28,18 @@ export async function handler(event) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
+  // Helper to parse cookies
+  const parseCookies = (cookieHeader) => {
+    const cookies = {};
+    if (cookieHeader) {
+      cookieHeader.split(';').forEach(cookie => {
+        const [name, value] = cookie.trim().split('=');
+        if (name && value) cookies[name] = value;
+      });
+    }
+    return cookies;
+  };
+
   try {
     // Get parameters from query string or body
     let userId, sessionId;
@@ -39,6 +51,15 @@ export async function handler(event) {
       const body = JSON.parse(event.body || '{}');
       userId = body.userId;
       sessionId = body.sessionId;
+    }
+
+    // Also check for userId in cookie (set before Stripe redirect)
+    if (!userId) {
+      const cookies = parseCookies(event.headers.cookie);
+      if (cookies.bl_uid) {
+        userId = cookies.bl_uid;
+        console.log('Retrieved userId from cookie:', userId);
+      }
     }
 
     // If we have a sessionId but no userId, get userId from Stripe session metadata

@@ -4,6 +4,18 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+// Helper to parse cookies
+const parseCookies = (cookieHeader) => {
+  const cookies = {};
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(cookie => {
+      const [name, value] = cookie.trim().split('=');
+      if (name && value) cookies[name] = value;
+    });
+  }
+  return cookies;
+};
+
 export async function handler(event) {
   if (event.httpMethod !== 'POST') {
     return {
@@ -26,7 +38,16 @@ export async function handler(event) {
   );
 
   try {
-    const { userId, mode, tone, questions, letterContent } = JSON.parse(event.body);
+    let { userId, mode, tone, questions, letterContent } = JSON.parse(event.body);
+
+    // Fallback: get userId from cookie if not in body
+    if (!userId) {
+      const cookies = parseCookies(event.headers.cookie);
+      if (cookies.bl_uid) {
+        userId = cookies.bl_uid;
+        console.log('Using userId from cookie:', userId);
+      }
+    }
 
     if (!userId || !letterContent) {
       return {
