@@ -148,8 +148,8 @@ export default function App() {
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [verifiedUserId, setVerifiedUserId] = useState(null); // UserId from Stripe session when auth is lost
   
-  // Track if we're returning from Stripe (session_id in URL means user was definitely logged in)
-  const isReturningFromPayment = new URLSearchParams(location.search).has('session_id');
+  // Track if we're returning from Stripe (stripe_session in URL means user was definitely logged in)
+  const isReturningFromPayment = new URLSearchParams(location.search).has('stripe_session');
 
   /* --------------------------------------------------------------------------
      [DATA] - Static data constants
@@ -363,7 +363,7 @@ export default function App() {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const paymentStatus = searchParams.get('payment');
-    const sessionId = searchParams.get('session_id');
+    const sessionId = searchParams.get('stripe_session');
 
     // If not a payment return, nothing to do
     if (!paymentStatus || !sessionId) return;
@@ -377,7 +377,7 @@ export default function App() {
     // For successful payment, verify immediately - don't wait for auth
     // We'll get the userId from Stripe session metadata
     if (paymentStatus === 'success' && !paymentVerified && !paymentLoading) {
-      console.log('Payment return: verifying with session_id (auth not required)...');
+      console.log('Payment return: verifying with stripe_session (auth not required)...');
       verifyPaymentReturn(sessionId);
     }
   }, [location.search, paymentVerified, paymentLoading]);
