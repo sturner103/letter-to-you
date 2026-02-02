@@ -489,6 +489,23 @@ export default function App() {
                        lifeEventModes.find(m => m.id === paymentMode);
       const modeName = modeInfo?.name || paymentMode;
 
+      // BACKUP: Store session tokens SERVER-SIDE before Stripe redirect
+      // This survives even when browser clears all localStorage
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await fetch('/.netlify/functions/store-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            userId: user.id,
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token
+          })
+        });
+        console.log('Session backed up server-side before Stripe redirect');
+      }
+
       // Set a cookie with userId BEFORE going to Stripe
       // This survives the redirect even if localStorage is wiped
       await fetch('/.netlify/functions/set-checkout-cookie', {

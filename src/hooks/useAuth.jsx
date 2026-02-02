@@ -42,7 +42,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     mountedRef.current = true;
     
-    // Set up auth state listener FIRST - this is the primary source of truth
+    // Set up auth state listener - this is the primary source of truth
+    // Session restore (if needed) happens in main.jsx BEFORE React mounts
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mountedRef.current) return;
