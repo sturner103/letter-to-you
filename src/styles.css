@@ -99,17 +99,46 @@ body {
 
 .nav-brand {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 500;
   color: var(--text);
-  background: none;
-  border: none;
+  background: var(--white);
+  border: 1.5px solid var(--border-dark);
   cursor: pointer;
-  padding: 0;
+  padding: 8px 14px 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  border-top-right-radius: 0;
+  border-radius: 4px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%, 0 0);
+}
+
+.nav-brand::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 16px;
+  height: 16px;
+  background: var(--bg-alt);
+  border-left: 1.5px solid var(--border-dark);
+  border-bottom: 1.5px solid var(--border-dark);
+}
+
+.nav-brand svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 .nav-brand:hover {
-  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.nav-brand:hover::before {
+  border-color: var(--accent);
 }
 
 .nav-links {

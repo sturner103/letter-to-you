@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44">
+  <!-- Container with folded corner -->
+  <path d="M1 1 H168 L184 17 V43 H1 Z" fill="white" stroke="#d4cfc7" stroke-width="1.5"/>
+  <!-- Folded corner -->
+  <path d="M168 1 V17 H184" fill="#f0ebe4" stroke="#d4cfc7" stroke-width="1.5"/>
+  <!-- Pen nib icon -->
+  <rect x="10" y="10" width="24" height="24" rx="3" fill="#6b7c6e"/>
+  <path d="M22 15 L28 22 L22 29 L16 22 Z" fill="white"/>
+  <line x1="22" y1="20" x2="22" y2="27" stroke="#6b7c6e" stroke-width="1"/>
+  <circle cx="22" cy="19" r="1.5" fill="#6b7c6e"/>
+  <!-- Wordmark -->
+  <text x="42" y="29" font-family="'Cormorant Garamond', Georgia, serif" font-size="18" fill="#2c2825" font-weight="500">Barry Letter</text>
+</svg>

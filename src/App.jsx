@@ -1291,7 +1291,13 @@ export default function App() {
       <nav className="navbar">
         <div className="navbar-inner">
           <button className="nav-brand" onClick={() => navigate('/')}>
-            Letter to You
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="12" fill="#6b7c6e"/>
+              <path d="M50 18 L68 50 L50 88 L32 50 Z" fill="white"/>
+              <line x1="50" y1="45" x2="50" y2="75" stroke="#6b7c6e" strokeWidth="3"/>
+              <circle cx="50" cy="42" r="5" fill="#6b7c6e"/>
+            </svg>
+            Barry Letter
           </button>
           <div className="nav-links">
             <button
@@ -1767,7 +1773,7 @@ export default function App() {
 
             <article className="letter">
               <div className="print-header">
-                <div className="print-logo">Letter to You</div>
+                <div className="print-logo">Barry Letter</div>
                 <div className="print-date">{new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
