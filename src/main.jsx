@@ -8,6 +8,42 @@ import './styles.css';
 import './auth-styles.css';
 import './styles-additions.css';
 
+// Handle OAuth callback BEFORE React mounts
+// Since detectSessionInUrl is false (to avoid Stripe conflicts), we manually process OAuth tokens
+async function handleOAuthCallback() {
+  // Check if this is an OAuth callback (has hash with access_token)
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    console.log('OAuth callback detected, processing tokens...');
+    
+    try {
+      // Parse the hash fragment
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        // Set the session manually
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+        
+        if (data?.session) {
+          console.log('OAuth session established successfully!');
+          // Clean up the URL (remove hash) and redirect to home
+          window.history.replaceState(null, '', '/');
+        } else if (error) {
+          console.error('Failed to set OAuth session:', error.message);
+        }
+      }
+    } catch (e) {
+      console.error('Error processing OAuth callback:', e);
+    }
+    return true; // Was an OAuth callback
+  }
+  return false; // Not an OAuth callback
+}
+
 // Restore session from server BEFORE React mounts
 // This handles Chrome's Bounce Tracking Mitigations wiping localStorage
 async function restoreSessionIfNeeded() {
@@ -45,8 +81,15 @@ async function restoreSessionIfNeeded() {
   }
 }
 
-// Restore session first, then mount React
-restoreSessionIfNeeded().then(() => {
+// Initialize app: handle OAuth first, then Stripe restore, then mount React
+async function initializeApp() {
+  // Step 1: Handle OAuth callback if present
+  await handleOAuthCallback();
+  
+  // Step 2: Restore session from server if returning from Stripe
+  await restoreSessionIfNeeded();
+  
+  // Step 3: Mount React
   createRoot(document.getElementById('root')).render(
     <StrictMode>
       <BrowserRouter>
@@ -56,5 +99,7 @@ restoreSessionIfNeeded().then(() => {
       </BrowserRouter>
     </StrictMode>
   );
-});
+}
+
+initializeApp();
 
