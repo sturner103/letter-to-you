@@ -3,6 +3,8 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth.jsx';
 import { supabase } from './lib/supabase.js';
 import AuthModal from './components/Auth/AuthModal';
+import LegalPage from './components/Legal/LegalPage';
+import CookieNotice from './components/CookieNotice/CookieNotice';
 import { modes, lifeEventModes, getQuestionsForMode, checkSafetyContent, crisisResources } from '../config/questions.js';
 
 /* ============================================================================
@@ -63,6 +65,7 @@ export default function App() {
     if (path.startsWith('/write/')) return 'interview';
     if (path === '/letter') return 'letter';
     if (path === '/crisis') return 'crisis';
+    if (path === '/legal') return 'legal';
     return 'landing'; // Default fallback
   };
   
@@ -1448,6 +1451,12 @@ export default function App() {
               If you're in crisis, please reach out to a <a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">crisis helpline</a>.
               This tool is not equipped to help with emergencies.
             </p>
+            <div className="landing-footer-links">
+              <a href="/legal#about">About</a>
+              <a href="/legal#contact">Contact</a>
+              <a href="/legal#privacy">Privacy</a>
+              <a href="/legal#terms">Terms</a>
+            </div>
           </footer>
         </div>
       )}
@@ -1978,6 +1987,13 @@ export default function App() {
         </div>
       )}
 
+      {/* [VIEW:LEGAL] - Legal pages (About, Contact, Privacy, Terms) */}
+      {view === 'legal' && (
+        <div className="view">
+          <LegalPage />
+        </div>
+      )}
+
       {/* Email Modal */}
       {showEmailModal && (
         <div className="modal-overlay">
@@ -2187,6 +2203,9 @@ export default function App() {
           }
         }} 
       />
+
+      {/* Cookie Notice Banner */}
+      <CookieNotice />
     </div>
   );
 }
