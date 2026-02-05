@@ -46,7 +46,7 @@ export const lifeEventQuestions = {
     {
       id: 'breakup-4',
       section: 'healing',
-      sectionName: 'Healing',
+      sectionName: 'Moving Forward',
       prompt: "What do you need to forgive—in them, or in yourself?",
       type: 'long_text'
     },
@@ -611,7 +611,10 @@ export function getQuestionsForMode(mode) {
 export const safetyKeywords = [
   'suicide', 'suicidal', 'kill myself', 'end my life', 'want to die',
   'self-harm', 'self harm', 'cutting myself', 'hurt myself',
-  'don\'t want to live', 'better off dead', 'no reason to live'
+  'don\'t want to live', 'better off dead', 'no reason to live',
+  'overdose', 'end it', 'end it all', 'no point in living', 'no point anymore',
+  'can\'t go on', 'give up on life', 'not worth living',
+  'make it stop', 'want it to be over', 'jump off', 'hang myself'
 ];
 
 export function checkSafetyContent(text) {

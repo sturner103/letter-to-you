@@ -2220,6 +2220,13 @@
   margin-bottom: 1.5rem;
 }
 
+.legal-note {
+  color: #888;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
 /* Footer links */
 .landing-footer-links {
   display: flex;
