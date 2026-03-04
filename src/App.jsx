@@ -85,6 +85,7 @@ export default function App() {
   const [hasLetter, setHasLetter] = useState(false);
   const [tone, setTone] = useState('youdecide');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authPurpose, setAuthPurpose] = useState(null); // null | 'payment' - tracks why auth modal was opened
   const [showAnswersModal, setShowAnswersModal] = useState(false);
   const [showRewriteModal, setShowRewriteModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -350,13 +351,33 @@ export default function App() {
   }, [selectedMode]);
 
   // Sync selectedMode with URL when navigating directly to /write/:mode
+  // Also restore from localStorage if available
   useEffect(() => {
     if (urlMode && urlMode !== selectedMode && urlMode !== 'quick') {
       setSelectedMode(urlMode);
-      setCurrentIndex(0);
-      setAnswers({});
-      setFollowUpOpen({});
-      setFollowUpAnswers({});
+
+      // Try to restore from localStorage
+      const savedDraft = localStorage.getItem(`draft_${urlMode}`);
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          setAnswers(draft.answers || {});
+          setFollowUpOpen(draft.followUpOpen || {});
+          setFollowUpAnswers(draft.followUpAnswers || {});
+          setTone(draft.tone || 'youdecide');
+          setCurrentIndex(draft.currentIndex || 0);
+        } catch (e) {
+          setCurrentIndex(0);
+          setAnswers({});
+          setFollowUpOpen({});
+          setFollowUpAnswers({});
+        }
+      } else {
+        setCurrentIndex(0);
+        setAnswers({});
+        setFollowUpOpen({});
+        setFollowUpAnswers({});
+      }
     }
   }, [urlMode]);
 
@@ -399,37 +420,34 @@ export default function App() {
       if (data.valid) {
         setCurrentPurchase(data.purchase);
         setPaymentVerified(true);
-        // Store the userId from Stripe session - we'll use this if auth is lost
-        if (data.userId) {
-          setVerifiedUserId(data.userId);
-          console.log('Stored verified userId from Stripe:', data.userId);
+        const userId = data.userId;
+        if (userId) {
+          setVerifiedUserId(userId);
+          console.log('Stored verified userId from Stripe:', userId);
         }
+        // Clean up URL params
         navigate(location.pathname, { replace: true });
-        console.log('Payment verified, questions unlocked');
+        console.log('Payment verified, restoring draft and generating letter...');
+
+        // Get the mode from the URL path (/write/:mode)
+        const mode = location.pathname.replace('/write/', '');
+
+        // Auto-generate the letter from saved draft
+        setPaymentLoading(false);
+        await restoreDraftAndGenerate(userId, mode);
       } else {
         setError('Payment verification failed. Please contact support if you were charged.');
         navigate('/', { replace: true });
+        setPaymentLoading(false);
       }
     } catch (err) {
       console.error('Payment verification error:', err);
       setError('Failed to verify payment. Please try again or contact support.');
-    } finally {
       setPaymentLoading(false);
     }
   };
 
-  // Protect interview route - redirect if not paid
-  // But DON'T redirect if we're in the middle of payment verification
-  useEffect(() => {
-    // Skip this check entirely if returning from payment
-    if (isReturningFromPayment) return;
-    
-    if (view === 'interview' && urlMode && urlMode !== 'quick' && user && !paymentVerified && !paymentLoading) {
-      setPaymentMode(urlMode);
-      setShowPaymentGate(true);
-      navigate('/', { replace: true });
-    }
-  }, [view, urlMode, user, paymentVerified, paymentLoading, isReturningFromPayment]);
+  // (Payment route guard removed — questions are now free to access, payment happens after)
 
   // Auto-focus textarea when question changes
   useEffect(() => {
@@ -437,6 +455,21 @@ export default function App() {
       textareaRef.current.focus();
     }
   }, [currentIndex, view]);
+
+  // Auto-save answers to localStorage during interview
+  useEffect(() => {
+    if (view === 'interview' && selectedMode && selectedMode !== 'quick') {
+      const draft = {
+        answers,
+        followUpOpen,
+        followUpAnswers,
+        tone,
+        currentIndex,
+        savedAt: Date.now()
+      };
+      localStorage.setItem(`draft_${selectedMode}`, JSON.stringify(draft));
+    }
+  }, [answers, followUpOpen, followUpAnswers, tone, currentIndex, view, selectedMode]);
 
   /* --------------------------------------------------------------------------
      [HANDLERS] - Event handlers and functions
@@ -452,30 +485,41 @@ export default function App() {
   };
 
   // ========================================
-  // MODIFIED: Handle starting the interview - now with payment gate
+  // MODIFIED: Handle starting the interview - no auth/payment gate, straight to questions
   // ========================================
   const startInterview = (mode) => {
-    // If not authenticated, show auth modal first
-    if (!isAuthenticated) {
-      setPaymentMode(mode);
-      setShowAuthModal(true);
-      return;
-    }
+    setSelectedMode(mode);
 
-    // If already have a verified purchase for this mode, go straight to questions
-    if (paymentVerified && currentPurchase?.letterMode === mode) {
-      setSelectedMode(mode);
-      setCurrentIndex(0);
+    // Try to restore from localStorage
+    const savedDraft = localStorage.getItem(`draft_${mode}`);
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        setAnswers(draft.answers || {});
+        setFollowUpOpen(draft.followUpOpen || {});
+        setFollowUpAnswers(draft.followUpAnswers || {});
+        setTone(draft.tone || 'youdecide');
+        if (draft.currentIndex !== undefined) {
+          setCurrentIndex(draft.currentIndex);
+        } else {
+          setCurrentIndex(0);
+        }
+      } catch (e) {
+        setAnswers({});
+        setFollowUpOpen({});
+        setFollowUpAnswers({});
+        setTone('youdecide');
+        setCurrentIndex(0);
+      }
+    } else {
       setAnswers({});
       setFollowUpOpen({});
       setFollowUpAnswers({});
-      navigate(`/write/${mode}`);
-      return;
+      setTone('youdecide');
+      setCurrentIndex(0);
     }
 
-    // Otherwise, show payment gate
-    setPaymentMode(mode);
-    setShowPaymentGate(true);
+    navigate(`/write/${mode}`);
   };
 
   // ========================================
@@ -551,6 +595,193 @@ export default function App() {
     setError(null);
   };
 
+  // ========================================
+  // NEW: Save draft answers and show payment gate
+  // Called when user finishes questions and clicks "Continue to payment"
+  // ========================================
+  const saveDraftAndShowPayment = async () => {
+    // If not authenticated, show auth modal first
+    if (!isAuthenticated) {
+      setPaymentMode(selectedMode);
+      setAuthPurpose('payment');
+      setShowAuthModal(true);
+      return;
+    }
+
+    // User is authenticated — save draft to Supabase, then show payment gate
+    setPaymentLoading(true);
+    setPaymentMode(selectedMode);
+
+    try {
+      const response = await fetch('/.netlify/functions/save-draft-answers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          mode: selectedMode,
+          answers,
+          followUpOpen,
+          followUpAnswers,
+          tone
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to save answers');
+      }
+
+      console.log('Draft answers saved to Supabase');
+      setPaymentLoading(false);
+      setShowPaymentGate(true);
+
+    } catch (err) {
+      console.error('Error saving draft:', err);
+      setError('Failed to save your answers. Please try again.');
+      setPaymentLoading(false);
+    }
+  };
+
+  // ========================================
+  // NEW: Restore draft answers and auto-generate letter after payment
+  // Called by verifyPaymentReturn after successful payment verification
+  // ========================================
+  const restoreDraftAndGenerate = async (userId, mode) => {
+    setIsGenerating(true);
+    setError(null);
+    setLetterSaveStatus(null);
+
+    try {
+      // Fetch draft from Supabase
+      const response = await fetch(
+        `/.netlify/functions/get-draft-answers?userId=${userId}&mode=${mode}`,
+        { credentials: 'include' }
+      );
+      const data = await response.json();
+
+      if (!data.draft) {
+        // No draft found — check localStorage as fallback
+        const savedDraft = localStorage.getItem(`draft_${mode}`);
+        if (savedDraft) {
+          const draft = JSON.parse(savedDraft);
+          data.draft = {
+            answers: draft.answers,
+            followUpOpen: draft.followUpOpen,
+            followUpAnswers: draft.followUpAnswers,
+            tone: draft.tone
+          };
+        } else {
+          throw new Error('No saved answers found. Please try again.');
+        }
+      }
+
+      // Restore state from draft
+      const draftAnswers = data.draft.answers || {};
+      const draftFollowUpOpen = data.draft.followUpOpen || {};
+      const draftFollowUpAnswers = data.draft.followUpAnswers || {};
+      const draftTone = data.draft.tone || 'youdecide';
+
+      setAnswers(draftAnswers);
+      setFollowUpOpen(draftFollowUpOpen);
+      setFollowUpAnswers(draftFollowUpAnswers);
+      setTone(draftTone);
+      setSelectedMode(mode);
+
+      // Build questions for this mode
+      const modeQuestions = getQuestionsForMode(mode);
+      setQuestions(modeQuestions);
+
+      // Build Q&A data for letter generation
+      const questionsData = modeQuestions.map((q) => {
+        const answer = draftAnswers[q.id]?.trim() || '[skipped]';
+        const followUpAnswer = draftFollowUpAnswers[q.id]?.trim();
+        return {
+          question: q.prompt,
+          answer: answer,
+          followUp: q.followUp && draftFollowUpOpen[q.id] && followUpAnswer ? {
+            question: q.followUp,
+            answer: followUpAnswer
+          } : null
+        };
+      });
+
+      const qaPairs = modeQuestions.map((q, i) => {
+        const answer = draftAnswers[q.id]?.trim() || '[skipped]';
+        const followUpAnswer = draftFollowUpAnswers[q.id]?.trim();
+        let text = `Q${i + 1}: ${q.prompt}\nA${i + 1}: ${answer}`;
+        if (q.followUp && draftFollowUpOpen[q.id] && followUpAnswer) {
+          text += `\n\nFollow-up: ${q.followUp}\nAnswer: ${followUpAnswer}`;
+        }
+        return text;
+      }).join('\n\n---\n\n');
+
+      const modeName = modes.find(m => m.id === mode)?.name ||
+                       lifeEventModes.find(m => m.id === mode)?.name ||
+                       'General Reflection';
+
+      // Generate the letter
+      const genResponse = await fetch('/.netlify/functions/generate-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, modeName, tone: draftTone, qaPairs })
+      });
+
+      if (!genResponse.ok) {
+        const errorData = await genResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate letter');
+      }
+
+      const genData = await genResponse.json();
+      if (!genData.letter) throw new Error('No letter content received');
+
+      setLetter(genData.letter);
+      setHasLetter(true);
+      setIsGenerating(false);
+      setLetterSaveStatus('saving');
+      navigate('/letter');
+      window.scrollTo(0, 0);
+
+      // Save the letter
+      const savedLetter = await saveLetterWithUserId(genData.letter, mode, draftTone, questionsData, userId);
+
+      // Mark purchase as used
+      if (currentPurchase?.id) {
+        try {
+          await fetch('/.netlify/functions/mark-purchase-used', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              purchaseId: currentPurchase.id,
+              letterId: savedLetter?.id,
+              userId: userId
+            })
+          });
+          setCurrentPurchase(null);
+          setPaymentVerified(false);
+        } catch (err) {
+          console.error('Failed to mark purchase as used:', err);
+        }
+      }
+
+      // Clean up draft from Supabase and localStorage
+      try {
+        await fetch(
+          `/.netlify/functions/get-draft-answers?userId=${userId}&mode=${mode}`,
+          { method: 'DELETE', credentials: 'include' }
+        );
+      } catch (e) {
+        console.error('Failed to clean up draft:', e);
+      }
+      localStorage.removeItem(`draft_${mode}`);
+
+    } catch (err) {
+      console.error('Restore and generate error:', err);
+      setError(`Something went wrong: ${err.message}. Please try again.`);
+      setIsGenerating(false);
+    }
+  };
+
   // Start quick letter (free - no payment required)
   const startQuickLetter = () => {
     setIsQuickMode(true);
@@ -599,7 +830,8 @@ export default function App() {
       if (hasSafetyContent()) {
         navigate('/crisis');
       } else {
-        generateLetter();
+        // Instead of generating immediately, trigger payment flow
+        saveDraftAndShowPayment();
       }
     }
   };
@@ -1610,6 +1842,9 @@ export default function App() {
       {/* [VIEW:INTERVIEW] - Main Paid Interview ----------------------------- */}
       {view === 'interview' && currentQuestion && (
         <div className="view interview">
+          <div className="interview-payment-notice">
+            Payment of $12 NZD is required to receive your letter after completing the questions.
+          </div>
           <div className="interview-layout">
             <aside className="question-sidebar">
               <div className="sidebar-header">
@@ -1723,7 +1958,7 @@ export default function App() {
                   </button>
 
                   <button className="btn primary" onClick={goNext}>
-                    {currentIndex === questions.length - 1 ? 'Generate letter' : 'Next →'}
+                    {currentIndex === questions.length - 1 ? 'Continue to payment' : 'Next →'}
                   </button>
                 </div>
               </div>
@@ -2165,17 +2400,16 @@ export default function App() {
 
                 <div className="payment-details">
                   <p className="payment-description">
-                    You're about to begin a guided reflection that will generate a personalized letter 
-                    based on your responses.
+                    Your answers have been saved. Complete payment to generate your personalized letter.
                   </p>
-                  
+
                   <div className="payment-includes">
                     <h4>What you'll get:</h4>
                     <ul>
-                      <li>✓ 8-10 thoughtful reflection questions</li>
-                      <li>✓ A 600-1,200 word personalized letter</li>
+                      <li>✓ Your personalized 600-1,200 word letter</li>
                       <li>✓ Concrete next steps based on your answers</li>
                       <li>✓ Letter saved to your account forever</li>
+                      <li>✓ Generated in about 30 seconds after payment</li>
                     </ul>
                   </div>
 
@@ -2197,7 +2431,7 @@ export default function App() {
                 </div>
 
                 <p className="payment-note">
-                  Secure payment via Stripe. Your answers are saved if you leave partway through.
+                  Secure payment via Stripe. Your answers have been saved and will be restored after payment.
                 </p>
               </>
             )}
@@ -2206,15 +2440,16 @@ export default function App() {
       )}
 
       {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
+      <AuthModal
+        isOpen={showAuthModal}
         onClose={() => {
           setShowAuthModal(false);
-          // If user was trying to access a paid mode, show payment gate after auth
-          if (paymentMode && isAuthenticated) {
-            setShowPaymentGate(true);
+          // If user just authenticated to pay, continue the draft-save-and-pay flow
+          if (authPurpose === 'payment' && isAuthenticated) {
+            setAuthPurpose(null);
+            saveDraftAndShowPayment();
           }
-        }} 
+        }}
       />
 
       {/* Cookie Notice Banner */}
