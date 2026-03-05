@@ -407,37 +407,50 @@ export default function App() {
   }, [location.search, paymentVerified, paymentLoading]);
 
   // Restore pending payment flow after Google OAuth redirect
-  // When user was answering questions, clicked "Continue to payment", and got redirected to Google
+  // Answers were saved server-side with a cookie before the redirect
   useEffect(() => {
     if (!isAuthenticated || !user) return;
+    // Don't interfere with Stripe payment return
+    if (isReturningFromPayment) return;
 
-    const pendingFlow = localStorage.getItem('pendingPaymentFlow');
-    if (!pendingFlow) return;
+    let cancelled = false;
 
-    try {
-      const { mode, answers: savedAnswers, followUpOpen: savedFollowUpOpen, followUpAnswers: savedFollowUpAnswers, tone: savedTone, currentIndex: savedIndex } = JSON.parse(pendingFlow);
-      localStorage.removeItem('pendingPaymentFlow');
+    const restoreFromServer = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/restore-draft-anonymous', {
+          credentials: 'include'
+        });
+        const data = await response.json();
 
-      // Restore all interview state
-      setSelectedMode(mode);
-      setAnswers(savedAnswers || {});
-      setFollowUpOpen(savedFollowUpOpen || {});
-      setFollowUpAnswers(savedFollowUpAnswers || {});
-      setTone(savedTone || 'youdecide');
-      setCurrentIndex(savedIndex || 0);
-      setPaymentMode(mode);
+        if (cancelled || !data.draft) return;
 
-      // Navigate to the interview page and trigger payment flow
-      navigate(`/write/${mode}`);
+        console.log('Restored draft from server after OAuth, mode:', data.draft.mode);
 
-      // Small delay to let state settle, then trigger the payment flow
-      setTimeout(() => {
-        saveDraftAndShowPayment();
-      }, 100);
-    } catch (e) {
-      console.error('Error restoring pending payment flow:', e);
-      localStorage.removeItem('pendingPaymentFlow');
-    }
+        const { mode, answers: savedAnswers, followUpOpen: savedFollowUpOpen, followUpAnswers: savedFollowUpAnswers, tone: savedTone } = data.draft;
+
+        // Restore all interview state
+        setSelectedMode(mode);
+        setAnswers(savedAnswers || {});
+        setFollowUpOpen(savedFollowUpOpen || {});
+        setFollowUpAnswers(savedFollowUpAnswers || {});
+        setTone(savedTone || 'youdecide');
+        setPaymentMode(mode);
+
+        // Navigate to the interview page and trigger payment flow
+        navigate(`/write/${mode}`);
+
+        // Small delay to let state settle, then trigger the payment flow
+        setTimeout(() => {
+          saveDraftAndShowPayment();
+        }, 100);
+      } catch (e) {
+        console.error('Error restoring draft from server:', e);
+      }
+    };
+
+    restoreFromServer();
+
+    return () => { cancelled = true; };
   }, [isAuthenticated, user]);
 
   // Verify payment when returning from Stripe
@@ -634,17 +647,26 @@ export default function App() {
   // Called when user finishes questions and clicks "Continue to payment"
   // ========================================
   const saveDraftAndShowPayment = async () => {
-    // If not authenticated, save state to localStorage before OAuth redirect
-    // (Google OAuth redirects away, losing all React state)
+    // If not authenticated, save answers server-side before OAuth redirect
+    // (Google OAuth redirects the page; Chrome wipes localStorage on return)
     if (!isAuthenticated) {
-      localStorage.setItem('pendingPaymentFlow', JSON.stringify({
-        mode: selectedMode,
-        answers,
-        followUpOpen,
-        followUpAnswers,
-        tone,
-        currentIndex
-      }));
+      try {
+        await fetch('/.netlify/functions/store-draft-anonymous', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            mode: selectedMode,
+            answers,
+            followUpOpen,
+            followUpAnswers,
+            tone
+          })
+        });
+        console.log('Draft answers saved server-side (cookie) before auth redirect');
+      } catch (err) {
+        console.error('Failed to save draft server-side:', err);
+      }
       setPaymentMode(selectedMode);
       setAuthPurpose('payment');
       setShowAuthModal(true);
