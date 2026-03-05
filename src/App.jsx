@@ -1814,20 +1814,26 @@ export default function App() {
             <div className="info-cards">
               <div className="info-card">
                 <div className="info-card-icon">◐</div>
-                <h3>Private</h3>
-                <p>Your letters are stored in your account, visible only to you. We don't share, sell, or train on your data.</p>
+                <div>
+                  <h3>Private</h3>
+                  <p>Your letters are stored in your account, visible only to you. We don't share, sell, or train on your data.</p>
+                </div>
               </div>
 
               <div className="info-card">
                 <div className="info-card-icon">◇</div>
-                <h3>Built from your words</h3>
-                <p>No generic advice. No platitudes. The letter comes from what you actually said — just organized and reflected back.</p>
+                <div>
+                  <h3>Built from your words</h3>
+                  <p>No generic advice. No platitudes. The letter comes from what you actually said — just organized and reflected back.</p>
+                </div>
               </div>
 
               <div className="info-card">
                 <div className="info-card-icon">⊙</div>
-                <h3>Something you keep</h3>
-                <p>Not a chat that scrolls away. People come back to their letters months later and say they still land.</p>
+                <div>
+                  <h3>Something you keep</h3>
+                  <p>Not a chat that scrolls away. People come back to their letters months later and say they still land.</p>
+                </div>
               </div>
             </div>
 
