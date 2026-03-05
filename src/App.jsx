@@ -572,16 +572,17 @@ export default function App() {
   // ========================================
   // NEW: Initiate Stripe checkout
   // ========================================
-  const initiatePayment = async () => {
-    if (!user || !paymentMode) return;
+  const initiatePayment = async (modeOverride) => {
+    const mode = modeOverride || paymentMode;
+    if (!user || !mode) return;
 
     setPaymentLoading(true);
     setError(null);
 
     try {
-      const modeInfo = letterTypes.find(t => t.id === paymentMode) ||
-                       lifeEventModes.find(m => m.id === paymentMode);
-      const modeName = modeInfo?.name || paymentMode;
+      const modeInfo = letterTypes.find(t => t.id === mode) ||
+                       lifeEventModes.find(m => m.id === mode);
+      const modeName = modeInfo?.name || mode;
 
       // BACKUP: Store session tokens SERVER-SIDE before Stripe redirect
       // This survives even when browser clears all localStorage
@@ -614,7 +615,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
-          mode: paymentMode,
+          mode: mode,
           modeName: modeName
         })
       });
@@ -697,8 +698,8 @@ export default function App() {
       }
 
       console.log('Draft answers saved to Supabase');
-      setPaymentLoading(false);
-      setShowPaymentGate(true);
+      // Go straight to Stripe — no intermediate modal
+      await initiatePayment(selectedMode);
 
     } catch (err) {
       console.error('Error saving draft:', err);
@@ -1908,7 +1909,7 @@ export default function App() {
       {view === 'interview' && currentQuestion && (
         <div className="view interview">
           <div className="interview-payment-notice">
-            Payment of $12 NZD is required to receive your letter after completing the questions.
+            Your personalized letter will be ready after these questions. Generation costs $12 USD.
           </div>
           <div className="interview-layout">
             <aside className="question-sidebar">
@@ -2018,12 +2019,14 @@ export default function App() {
                     ← Previous
                   </button>
 
-                  <button className="btn text" onClick={skipQuestion}>
-                    Skip
-                  </button>
+                  {currentIndex < questions.length - 1 && (
+                    <button className="btn text" onClick={skipQuestion}>
+                      Skip
+                    </button>
+                  )}
 
                   <button className="btn primary" onClick={goNext}>
-                    {currentIndex === questions.length - 1 ? 'Continue to payment' : 'Next →'}
+                    {currentIndex === questions.length - 1 ? 'Continue to payment — $12' : 'Next →'}
                   </button>
                 </div>
               </div>
