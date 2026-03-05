@@ -1723,9 +1723,6 @@ export default function App() {
               People come back to their letters weeks or months later and say they still land.
               That's the point — this isn't a chat that disappears. It's something you keep.
             </p>
-            <p className="section-intro" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Barry Letter is a self-reflection tool, not therapy or professional mental health support.
-            </p>
           </section>
 
           {/* Email Signup Section */}
