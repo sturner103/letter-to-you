@@ -2432,8 +2432,10 @@
   justify-content: center;
 }
 .meet-barry-content {
-  max-width: 620px;
-  padding: 2.5rem 1.5rem 4rem;
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
 }
 .meet-barry-hero {
   margin-bottom: 2.5rem;
