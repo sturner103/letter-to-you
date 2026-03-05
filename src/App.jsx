@@ -1633,18 +1633,38 @@ export default function App() {
       {view === 'landing' && (
         <div className="view landing">
           <div className="landing-hero">
-            <h1 className="hero-title">Letter to You</h1>
+            <h1 className="hero-title">A letter to you, from you</h1>
             <p className="hero-subtitle">
-              A guided reflection that ends with a letter — written to you, about you,
-              based on your own words.
+              Barry Letter asks you ten thoughtful questions about what you're going through,
+              then writes you a personal letter based on your own words. It takes about 15 minutes
+              and costs $12. Most people say it's the most honest conversation they've had with
+              themselves in years.
             </p>
           </div>
 
+          {/* How it works — brief, upfront */}
+          <section className="landing-section">
+            <div className="how-brief">
+              <div className="how-brief-item">
+                <span className="how-brief-num">1</span>
+                <p><strong>Pick a reflection</strong> — choose what's on your mind right now</p>
+              </div>
+              <div className="how-brief-item">
+                <span className="how-brief-num">2</span>
+                <p><strong>Answer ten questions</strong> — write as much or as little as you want</p>
+              </div>
+              <div className="how-brief-item">
+                <span className="how-brief-num">3</span>
+                <p><strong>Get your letter</strong> — a 600–1,200 word letter that reflects your words back to you, with clarity</p>
+              </div>
+            </div>
+          </section>
+
           {/* Main Reflection Types */}
           <section className="landing-section" ref={modesRef}>
-            <h2 className="section-title">Choose a reflection</h2>
+            <h2 className="section-title">What's on your mind?</h2>
             <p className="section-intro">
-              Each type asks different questions and produces a different kind of letter. Takes 10-15 minutes.
+              Each reflection focuses on a different part of your life. Pick whatever feels right.
             </p>
             <div className="letter-types-grid">
               {letterTypes.map(type => (
@@ -1683,29 +1703,22 @@ export default function App() {
             </div>
           </section>
 
-          {/* What It Is / Isn't Section */}
+          {/* What You Get Section */}
           <section className="landing-section">
-            <h2 className="section-title">What this is (and isn't)</h2>
-            <div className="what-it-is-grid">
-              <div className="what-box is">
-                <h3>What it is</h3>
-                <ul>
-                  <li>A structured way to think through what you're feeling</li>
-                  <li>Questions designed to surface what's under the surface</li>
-                  <li>A letter that reflects your own words back to you</li>
-                  <li>Private — your letters are stored securely and visible only to you</li>
-                  <li>Something you can return to over time</li>
-                </ul>
-              </div>
-              <div className="what-box isnt">
-                <h3>What it isn't</h3>
-                <ul>
-                  <li>Therapy or professional mental health support</li>
-                  <li>A diagnosis or treatment recommendation</li>
-                  <li>A replacement for talking to a real person</li>
-                </ul>
-              </div>
-            </div>
+            <h2 className="section-title">What you actually get</h2>
+            <p className="section-intro">
+              You answer ten questions — honestly, in your own words. Then you receive a letter that
+              takes everything you said and reflects it back with clarity. Not advice. Not platitudes.
+              Just your own thoughts, organized in a way that helps you see what you couldn't when it
+              was all swirling around in your head.
+            </p>
+            <p className="section-intro">
+              People come back to their letters weeks or months later and say they still land.
+              That's the point — this isn't a chat that disappears. It's something you keep.
+            </p>
+            <p className="section-intro" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Barry Letter is a self-reflection tool, not therapy or professional mental health support.
+            </p>
           </section>
 
           {/* Email Signup Section */}
@@ -1757,30 +1770,36 @@ export default function App() {
       {view === 'how-it-works' && (
         <div className="view static-page">
           <div className="static-content">
-            <h1>How it works</h1>
+            <h1>How Barry Letter works</h1>
+
+            <p style={{ fontSize: '1.05rem', marginBottom: '2rem' }}>
+              It's simple. You pick what's on your mind, answer ten honest questions, and get a
+              letter that takes your words and reflects them back with clarity you didn't have before.
+              The whole thing takes about 15 minutes and costs $12.
+            </p>
 
             <div className="steps">
               <div className="step">
                 <div className="step-number">1</div>
                 <div className="step-content">
-                  <h3>Choose a focus</h3>
-                  <p>Select from four reflection types: general, relationships, career, or life transitions. Each asks different questions tailored to that area.</p>
+                  <h3>Choose what's on your mind</h3>
+                  <p>Career, relationships, a life transition, or just a general "where am I at?" — pick the one that fits and the questions adapt.</p>
                 </div>
               </div>
 
               <div className="step">
                 <div className="step-number">2</div>
                 <div className="step-content">
-                  <h3>Answer the questions</h3>
-                  <p>You'll see 10 questions, one at a time. Write as much or as little as you want. Skip any that don't resonate. Some have optional "go deeper" follow-ups.</p>
+                  <h3>Answer honestly</h3>
+                  <p>Ten questions, one at a time. No right answers. Write as much or as little as you want — skip any that don't resonate. Some have optional follow-ups if you want to go deeper.</p>
                 </div>
               </div>
 
               <div className="step">
                 <div className="step-number">3</div>
                 <div className="step-content">
-                  <h3>Receive your letter</h3>
-                  <p>Based on your responses, you'll get a 600-1,200 word letter that synthesizes what you shared. It ends with 2-4 concrete next steps drawn from your own words.</p>
+                  <h3>Read your letter</h3>
+                  <p>You'll receive a 600–1,200 word letter built from what you said. It's not advice. It's your own thinking, reflected back in a way that helps you see patterns, name what you're feeling, and figure out what to do next.</p>
                 </div>
               </div>
             </div>
@@ -1788,25 +1807,25 @@ export default function App() {
             <div className="info-cards">
               <div className="info-card">
                 <div className="info-card-icon">◐</div>
-                <h3>Private by design</h3>
-                <p>Your letters are stored securely in your account and visible only to you. We don't share, sell, or train on your data.</p>
+                <h3>Private</h3>
+                <p>Your letters are stored in your account, visible only to you. We don't share, sell, or train on your data.</p>
               </div>
 
               <div className="info-card">
                 <div className="info-card-icon">◇</div>
-                <h3>Real questions</h3>
-                <p>Not therapy. Not a quiz. Just thoughtful prompts designed to help you think out loud.</p>
+                <h3>Built from your words</h3>
+                <p>No generic advice. No platitudes. The letter comes from what you actually said — just organized and reflected back.</p>
               </div>
 
               <div className="info-card">
                 <div className="info-card-icon">⊙</div>
-                <h3>A mirror, not advice</h3>
-                <p>Your letter reflects your words back — helping you see patterns and name what you're feeling.</p>
+                <h3>Something you keep</h3>
+                <p>Not a chat that scrolls away. People come back to their letters months later and say they still land.</p>
               </div>
             </div>
 
             <button className="btn primary" onClick={scrollToModes}>
-              Begin your reflection
+              Start a reflection →
             </button>
           </div>
         </div>
@@ -1889,8 +1908,14 @@ export default function App() {
       {/* [VIEW:INTERVIEW] - Main Paid Interview ----------------------------- */}
       {view === 'interview' && currentQuestion && (
         <div className="view interview">
-          <div className="interview-payment-notice">
-            Your personalized letter will be ready after these questions. Generation costs $12 USD.
+          <div className="interview-context">
+            <span className="interview-context-mode">
+              {(() => {
+                const modeInfo = letterTypes.find(t => t.id === selectedMode) || lifeEventModes.find(m => m.id === selectedMode);
+                return modeInfo ? `${modeInfo.icon || ''} ${modeInfo.name}` : '';
+              })()}
+            </span>
+            <span className="interview-context-note">Your letter costs $12 after you finish</span>
           </div>
           <div className="interview-layout">
             <aside className="question-sidebar">

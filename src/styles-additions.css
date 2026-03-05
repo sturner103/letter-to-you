@@ -2353,16 +2353,73 @@
 }
 
 /* ==========================================
-   INTERVIEW PAYMENT NOTICE BANNER
+   INTERVIEW CONTEXT BAR
    ========================================== */
-.interview-payment-notice {
-  background: #f5f2ed;
-  border: 1px solid #e5e1db;
-  border-radius: 8px;
+.interview-context {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 20px;
+  margin: 12px auto 12px;
+  max-width: 960px;
   font-size: 0.85rem;
   color: #5c5652;
-  margin: 16px auto 16px;
-  max-width: 960px;
-  text-align: center;
+}
+.interview-context-mode {
+  font-weight: 500;
+  color: #2c2825;
+}
+.interview-context-note {
+  color: #8a847d;
+  font-size: 0.8rem;
+}
+
+/* ==========================================
+   LANDING: HOW IT WORKS BRIEF
+   ========================================== */
+.how-brief {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+.how-brief-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 280px;
+}
+.how-brief-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: #6b7c6e;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.how-brief-item p {
+  font-size: 0.9rem;
+  color: #5c5652;
+  margin: 0;
+  line-height: 1.5;
+}
+.how-brief-item p strong {
+  color: #2c2825;
+}
+
+@media (max-width: 700px) {
+  .how-brief {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .interview-context {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
 }
