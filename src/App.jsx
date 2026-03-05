@@ -66,6 +66,7 @@ export default function App() {
     if (path === '/letter') return 'letter';
     if (path === '/crisis') return 'crisis';
     if (path === '/legal') return 'legal';
+    if (path === '/meet-barry') return 'meet-barry';
     return 'landing'; // Default fallback
   };
   
@@ -1611,6 +1612,12 @@ export default function App() {
               How it works
             </button>
             <button
+              className={`nav-link ${location.pathname === '/meet-barry' ? 'active' : ''}`}
+              onClick={() => navigate('/meet-barry')}
+            >
+              Meet Barry
+            </button>
+            <button
               className={`nav-link ${location.pathname === '/your-letters' ? 'active' : ''}`}
               onClick={() => navigate('/your-letters')}
             >
@@ -1827,6 +1834,95 @@ export default function App() {
             <button className="btn primary" onClick={scrollToModes}>
               Start a reflection →
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* [VIEW:MEET-BARRY] ------------------------------------------------- */}
+      {view === 'meet-barry' && (
+        <div className="view meet-barry-page">
+          <div className="meet-barry-content">
+
+            <div className="meet-barry-hero">
+              <h1>Hi, I'm Barry</h1>
+              <p className="meet-barry-tagline">I built this because writing letters to myself actually helped.</p>
+            </div>
+
+            <div className="meet-barry-story">
+              <p>
+                A few years ago I was going through a rough patch. Nothing dramatic — just that slow
+                accumulation of things not quite working. Career felt stale. Relationships felt
+                complicated. I couldn't figure out what I actually wanted.
+              </p>
+              <p>
+                So I started writing letters to myself. I'd jot down some questions — honest ones,
+                the kind you don't usually ask out loud — and then write a letter as if I were a
+                thoughtful friend looking in from the outside.
+              </p>
+              <p>
+                Sometimes the letter was gentle and reassuring. Sometimes it was a kick up the
+                backside. Sometimes it was just... clear, in a way my swirling thoughts never were.
+              </p>
+
+              <div className="meet-barry-pullquote">
+                I'd read them back weeks later and think: how did I know that? But I did know it.
+                I just couldn't hear it until someone — even if that someone was me — wrote it down.
+              </div>
+
+              <p>
+                I tried different voices. What would a wise mentor say? A straight-talking best mate?
+                A compassionate coach? Each perspective helped me see things I'd been too close to notice.
+                The letters became something I looked forward to — not as a daily habit, but as a tool
+                I'd reach for during life's bigger moments.
+              </p>
+              <p>
+                Eventually I thought: what if everyone could do this? What if the questions were
+                carefully crafted, and the letter-writing part was handled by AI that actually
+                understood what you were going through? Not a chatbot. Not a therapist. Just a
+                mirror — one that helps you hear yourself more clearly.
+              </p>
+              <p>
+                So I built Barry Letter.
+              </p>
+
+              <h2>Why letters?</h2>
+              <p>
+                There's something different about a letter. It's not a chat that scrolls away. It's
+                not advice from a stranger. It's your own thoughts, organized and reflected back with
+                care. You can read it today, tuck it away, and read it again in six months when you
+                need it.
+              </p>
+              <p>
+                The best part? It's built from your words. You do the reflecting. The letter just
+                helps you hear yourself more clearly.
+              </p>
+
+              <h2>What I believe</h2>
+              <p>
+                <strong>Letters, not chats.</strong> Chats disappear. Letters stick around. They have weight.
+              </p>
+              <p>
+                <strong>Moments, not habits.</strong> This isn't another app trying to own your morning
+                routine. It's here when you need it — during transitions, crossroads, or those
+                Tuesday afternoons when something just feels off.
+              </p>
+              <p>
+                <strong>Your words, reflected back.</strong> No generic advice. No platitudes. Just
+                you, talking to yourself, with a little help organizing the conversation.
+              </p>
+            </div>
+
+            <div className="meet-barry-signoff">
+              <p className="meet-barry-signature">— Barry</p>
+              <p className="meet-barry-location">Wanaka, Aotearoa New Zealand</p>
+            </div>
+
+            <div className="meet-barry-cta">
+              <button className="btn primary" onClick={scrollToModes}>
+                Write your letter →
+              </button>
+            </div>
+
           </div>
         </div>
       )}

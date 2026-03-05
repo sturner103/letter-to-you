@@ -2423,3 +2423,82 @@
     text-align: center;
   }
 }
+
+/* ==========================================
+   MEET BARRY PAGE
+   ========================================== */
+.meet-barry-page {
+  display: flex;
+  justify-content: center;
+}
+.meet-barry-content {
+  max-width: 620px;
+  padding: 2.5rem 1.5rem 4rem;
+}
+.meet-barry-hero {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e5e1db;
+}
+.meet-barry-hero h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: #2c2825;
+  margin-bottom: 0.5rem;
+}
+.meet-barry-tagline {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: #8a847d;
+}
+.meet-barry-story p {
+  font-size: 0.95rem;
+  color: #5c5652;
+  line-height: 1.75;
+  margin-bottom: 1.1rem;
+}
+.meet-barry-story h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #2c2825;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+.meet-barry-story strong {
+  color: #2c2825;
+}
+.meet-barry-pullquote {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: #2c2825;
+  border-left: 3px solid #6b7c6e;
+  padding: 1rem 0 1rem 1.5rem;
+  margin: 2rem 0;
+  background: #faf8f5;
+}
+.meet-barry-signoff {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e1db;
+  text-align: center;
+}
+.meet-barry-signature {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: #2c2825;
+  margin-bottom: 0.25rem;
+}
+.meet-barry-location {
+  font-size: 0.8rem;
+  color: #8a847d;
+}
+.meet-barry-cta {
+  text-align: center;
+  margin-top: 2rem;
+}
