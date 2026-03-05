@@ -406,6 +406,40 @@ export default function App() {
     }
   }, [location.search, paymentVerified, paymentLoading]);
 
+  // Restore pending payment flow after Google OAuth redirect
+  // When user was answering questions, clicked "Continue to payment", and got redirected to Google
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    const pendingFlow = localStorage.getItem('pendingPaymentFlow');
+    if (!pendingFlow) return;
+
+    try {
+      const { mode, answers: savedAnswers, followUpOpen: savedFollowUpOpen, followUpAnswers: savedFollowUpAnswers, tone: savedTone, currentIndex: savedIndex } = JSON.parse(pendingFlow);
+      localStorage.removeItem('pendingPaymentFlow');
+
+      // Restore all interview state
+      setSelectedMode(mode);
+      setAnswers(savedAnswers || {});
+      setFollowUpOpen(savedFollowUpOpen || {});
+      setFollowUpAnswers(savedFollowUpAnswers || {});
+      setTone(savedTone || 'youdecide');
+      setCurrentIndex(savedIndex || 0);
+      setPaymentMode(mode);
+
+      // Navigate to the interview page and trigger payment flow
+      navigate(`/write/${mode}`);
+
+      // Small delay to let state settle, then trigger the payment flow
+      setTimeout(() => {
+        saveDraftAndShowPayment();
+      }, 100);
+    } catch (e) {
+      console.error('Error restoring pending payment flow:', e);
+      localStorage.removeItem('pendingPaymentFlow');
+    }
+  }, [isAuthenticated, user]);
+
   // Verify payment when returning from Stripe
   // Note: Does NOT require user to be logged in - gets userId from Stripe session or cookie
   const verifyPaymentReturn = async (sessionId) => {
@@ -600,8 +634,17 @@ export default function App() {
   // Called when user finishes questions and clicks "Continue to payment"
   // ========================================
   const saveDraftAndShowPayment = async () => {
-    // If not authenticated, show auth modal first
+    // If not authenticated, save state to localStorage before OAuth redirect
+    // (Google OAuth redirects away, losing all React state)
     if (!isAuthenticated) {
+      localStorage.setItem('pendingPaymentFlow', JSON.stringify({
+        mode: selectedMode,
+        answers,
+        followUpOpen,
+        followUpAnswers,
+        tone,
+        currentIndex
+      }));
       setPaymentMode(selectedMode);
       setAuthPurpose('payment');
       setShowAuthModal(true);
