@@ -559,7 +559,7 @@ body {
 
 /* Landing Footer */
 .landing-footer {
-  padding: var(--space-lg) var(--space-md);
+  padding: 1rem var(--space-md);
   border-top: 1px solid var(--border);
   margin-top: var(--space-lg);
   max-width: var(--max-width-full);
@@ -571,7 +571,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-md);
+  margin-bottom: 0.75rem;
 }
 
 .footer-brand {
@@ -609,10 +609,10 @@ body {
 }
 
 .footer-disclaimer {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  line-height: 1.5;
-  padding-top: var(--space-md);
+  line-height: 1.4;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border);
 }
 

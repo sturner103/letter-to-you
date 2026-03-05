@@ -160,8 +160,7 @@ const ContactContent = () => (
     
     <h2>Where I'm Based</h2>
     <p>
-      Christchurch, New Zealand. Beautiful place. Good coffee. Occasionally earthquakes. 
-      If you're ever in town, the kettle's on.
+      Wanaka, New Zealand. Mountains, lake, good coffee. If you're ever passing through, say hi.
     </p>
   </div>
 );

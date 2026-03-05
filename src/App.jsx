@@ -1750,25 +1750,6 @@ export default function App() {
             </div>
           </section>
 
-          <footer className="landing-footer">
-            <div className="footer-main">
-              <div className="footer-brand">
-                <span className="footer-logo">Barry Letter</span>
-                <span className="footer-copyright">© {new Date().getFullYear()} Barry Letter. All rights reserved.</span>
-              </div>
-              <div className="footer-links">
-                <a href="/legal#about">About</a>
-                <a href="/legal#contact">Contact</a>
-                <a href="/legal#privacy">Privacy</a>
-                <a href="/legal#terms">Terms</a>
-              </div>
-            </div>
-            <div className="footer-disclaimer">
-              Barry Letter is a self-reflection tool, not a substitute for professional mental health care. 
-              If you're experiencing a crisis, please contact a <a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">crisis helpline</a> or 
-              seek help from a qualified professional.
-            </div>
-          </footer>
         </div>
       )}
 
@@ -2308,6 +2289,29 @@ export default function App() {
         <div className="view">
           <LegalPage />
         </div>
+      )}
+
+      {/* Footer — shown on all pages */}
+      {!isGenerating && (
+        <footer className="landing-footer">
+          <div className="footer-main">
+            <div className="footer-brand">
+              <span className="footer-logo">Barry Letter</span>
+              <span className="footer-copyright">© {new Date().getFullYear()} Barry Letter. All rights reserved.</span>
+            </div>
+            <div className="footer-links">
+              <a href="/legal#about">About</a>
+              <a href="/legal#contact">Contact</a>
+              <a href="/legal#privacy">Privacy</a>
+              <a href="/legal#terms">Terms</a>
+            </div>
+          </div>
+          <div className="footer-disclaimer">
+            Barry Letter is a self-reflection tool, not a substitute for professional mental health care.
+            If you're experiencing a crisis, please contact a <a href="https://findahelpline.com/" target="_blank" rel="noopener noreferrer">crisis helpline</a> or
+            seek help from a qualified professional.
+          </div>
+        </footer>
       )}
 
       {/* Email Modal */}
